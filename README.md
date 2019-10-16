@@ -1,2 +1,3 @@
-# @ksu/tfp
+# @flowwishthebest/tfp
+
 Theoretical foundations of programming
