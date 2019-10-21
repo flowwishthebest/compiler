@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "jest -c ./jest.config.json",
-    "coverage": "cat ./coverage/lcov.info | coveralls",
+    "coverage": "cat lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "build": "tsc",
     "lint": "tslint -p ./tsconfig.json -c ./tslint.json"
   },
