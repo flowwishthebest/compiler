@@ -3,8 +3,8 @@
     "collectCoverage": true,
     "coverageDirectory": "../coverage/",
     "moduleFileExtensions": [
-        "ts",
-        "js"
+        "js",
+        "ts"
     ],
     "preset": "ts-jest"
 }
