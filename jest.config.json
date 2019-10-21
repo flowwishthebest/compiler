@@ -1,0 +1,10 @@
+{
+    "rootDir": "__tests__/",
+    "collectCoverage": true,
+    "coverageDirectory": "../coverage/",
+    "moduleFileExtensions": [
+        "ts",
+        "js"
+    ],
+    "preset": "ts-jest"
+}
