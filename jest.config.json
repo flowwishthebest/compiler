@@ -2,6 +2,7 @@
     "rootDir": "__tests__/",
     "collectCoverage": true,
     "coverageDirectory": "../coverage/",
+    "coverageReporters": ["lcov"],
     "moduleFileExtensions": [
         "js",
         "ts"
