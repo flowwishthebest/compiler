@@ -10,7 +10,8 @@
     "test": "jest -c ./jest.config.json",
     "coverage": "cat ./coverage/lcov.info | coveralls",
     "build": "tsc",
-    "lint": "tslint -p ./tsconfig.json -c ./tslint.json"
+    "lint": "tslint -p ./tsconfig.json -c ./tslint.json",
+    "prettify": "prettier --config ./prettierrc.json --write '{src,__tests__}/**/*.ts'"
   },
   "keywords": [
     "computer science",
@@ -24,8 +25,10 @@
     "@types/jest": "24.0.19",
     "coveralls": "3.0.7",
     "jest": "24.9.0",
+    "prettier": "1.18.2",
     "ts-jest": "24.1.0",
     "tslint": "5.20.0",
     "typescript": "3.6.4"
-  }
+  },
+  "dependencies": {}
 }

@@ -3,9 +3,6 @@
     "collectCoverage": true,
     "coverageDirectory": "../coverage/",
     "coverageReporters": ["lcov"],
-    "moduleFileExtensions": [
-        "js",
-        "ts"
-    ],
+    "moduleFileExtensions": ["js", "ts"],
     "preset": "ts-jest"
 }
