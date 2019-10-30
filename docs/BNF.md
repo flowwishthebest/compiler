@@ -37,10 +37,10 @@ __Syntax BNF__
 \<iteration-statement>    ::= \<while-statement> \
 \<conditional-statement>  ::= \<if-statement> \
 \<while-statement>        ::= while (\<expression>) '{' \<statement-list> '}' \
-\<if-statement>           ::= \<__ifpart__>  { \<__elseifpart__>  } { \<__elsepart__> } \
-\<__ifpart__>             ::= if (\<expression>) '{' \<statement-list> '}' \
-\<__elseifpart__>         ::= else if (\<expression>) '{' \<statement-list> '}' \
-\<__elsepart__>           ::= else '{' \<statement-list> '}'
+\<if-statement>           ::= \<\_\_ifpart__>  { \<\_\_elseifpart__>  } { \<\_\_elsepart__> } \
+\<\_\_ifpart__>             ::= if (\<expression>) '{' \<statement-list> '}' \
+\<\_\_elseifpart__>         ::= else if (\<expression>) '{' \<statement-list> '}' \
+\<\_\_elsepart__>           ::= else '{' \<statement-list> '}'
 
 
 \<reserved-words> ::= 'false' | 'new' | 'null' | 'return' | 'true' | 'var' | 'for' | 'while' | 'integer' | 'float' | 'boolean' | 'unknown' |  'else' | 'if'
@@ -65,22 +65,12 @@ __Syntax BNF__
                         | |=
 
 
-Зарезервированные слова:
+[ ] операторы присвоения;
+[X] условный оператор;
+[X] оператор цикла;
 
-операторы присвоения;
-условный оператор;
-оператор цикла;
-
-операторы ввода и вывода на экран;
+[ ] операторы ввода и вывода на экран;
 [X] поддержка целочисленных, вещественных переменных;
-поддержка арифметических операций с числами;
-поддержка одномерных числовых массивов;
-возможность написания комментариев.
-
----
-
-\<exp-symb> ::= 'e' | 'E'
-
-\<floatnumber>   ::=  pointfloat | exponentfloat
-\<pointfloat>    ::=  [intpart] fraction | intpart "."
-\<exponentfloat> ::=  (intpart | pointfloat) exponent
+[ ] поддержка арифметических операций с числами;
+[ ] поддержка одномерных числовых массивов;
+[ ] возможность написания комментариев.
