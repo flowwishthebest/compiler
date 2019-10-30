@@ -7,7 +7,7 @@ __Syntax BNF__
 \<comma-symb>       ::= ','
 
 
-\<identifier> ::= [\<prefix-symb>] \<letter> { \<letter> | \<digit> }
+\<identifier> ::= [\<prefix-symb>] \<letter> { \<letter> | \<digit> } \
 \<identifier-list>  ::=  \<identifier> {\<comma-symb> \<identifier> }
 
 
