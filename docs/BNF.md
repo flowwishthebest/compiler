@@ -68,7 +68,7 @@ __@bnf__
 
 
 \<reserved-words> ::=
-  | 'false'
+    'false'
   | 'true'
   | 'while'
   | 'integer'
