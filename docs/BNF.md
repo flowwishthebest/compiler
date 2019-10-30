@@ -37,7 +37,7 @@ __Syntax BNF__
 \<iteration-statement>    ::= \<while-statement> \
 \<conditional-statement>  ::= \<if-statement> \
 \<while-statement>        ::= while (\<expression>) '{' \<statement-list> '}' \
-\<if-statement>           ::= \<\_\_ifpart__>  { \<\_\_elseifpart__>  } { \<\_\_elsepart__> } \
+\<if-statement>           ::= \<\_\_ifpart__>  { \<\_\_elseifpart__>  } [ \<\_\_elsepart__> ] \
 \<\_\_ifpart__>             ::= if (\<expression>) '{' \<statement-list> '}' \
 \<\_\_elseifpart__>         ::= else if (\<expression>) '{' \<statement-list> '}' \
 \<\_\_elsepart__>           ::= else '{' \<statement-list> '}'
