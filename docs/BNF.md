@@ -7,7 +7,7 @@ __Syntax BNF__
 \<comma-symb>       ::= ','
 
 
-\<identifier> ::= [\<prefix-symb>] \<letter> { \<letter> | \<digit> } \
+\<identifier>       ::= [\<prefix-symb>] \<letter> { \<letter> | \<digit> } \
 \<identifier-list>  ::=  \<identifier> {\<comma-symb> \<identifier> }
 
 
@@ -26,51 +26,65 @@ __Syntax BNF__
 \<exponent-float>      ::=  (\<integer> | \<point-float>) \<exponent>
 
 
-\<expression>  ::=
-
-\<assignment-operator> ::= '='
+\<assignment-operator> ::= '=' \
 \<assignment-expression>  ::= \<assignment-operator> \<assignment-expression>
 
 
+\<declarator>           ::= \<type-qualifier> \<direct-declarator> \
+\<type-qualifier>       ::= 'integer' | 'float' | 'boolean' | 'unknown' \
+\<direct-declarator>    ::= \<identifier> | (\<declarator>) \
+\<declarator-statement> ::= \<declarator> | \<declarator> \<assignment-operator> \<initializer> \
+\<initializer>          ::= \<assignment-expression>
+
+
+<primary-expression> ::= <identifier> | <constant> | (<expression>) \
+<constant>           ::= <integer-constant> | <boolean-constant> | <floating-constant>
+<expression>         ::= <assignment-expression> | <expression> \<comma-symb> <assignment-expression>
+
+
+<add-expr> ::= \<multi-expr> | \<add-expr> + \<multi-expr> | \<add-expr> - \<multi-expr>
+<multi-expr> ::= \<multi-expr> * <cast-expr> | \<multi-expr> / \<cast-expr>
+
+
 \<statement>              ::= \<iteration-statement> | \<conditional-statement> \
-\<statement-list>         ::= \<statement> { \<statement> } \
+\<statement-list>         ::= \<statement> { \<statement> }
+
+
 \<iteration-statement>    ::= \<while-statement> \
-\<conditional-statement>  ::= \<if-statement> \
-\<while-statement>        ::= while (\<expression>) '{' \<statement-list> '}' \
-\<if-statement>           ::= \<\_\_ifpart__>  { \<\_\_elseifpart__>  } [ \<\_\_elsepart__> ] \
+\<while-statement>        ::= while (\<expression>) '{' \<statement-list> '}' 
+
+
+\<conditional-statement>    ::= \<if-statement> \
+\<if-statement>             ::= \<\_\_ifpart__>  { \<\_\_elseifpart__>  } [ \<\_\_elsepart__> ] \
 \<\_\_ifpart__>             ::= if (\<expression>) '{' \<statement-list> '}' \
 \<\_\_elseifpart__>         ::= else if (\<expression>) '{' \<statement-list> '}' \
 \<\_\_elsepart__>           ::= else '{' \<statement-list> '}'
 
-
-\<reserved-words> ::= 'false' | 'new' | 'null' | 'return' | 'true' | 'var' | 'for' | 'while' | 'integer' | 'float' | 'boolean' | 'unknown' |  'else' | 'if'
-
-
+<single-line-comment> ::= '//'
+<text-comment>        ::= '/*' '*/'
 
 
+\<reserved-words> ::=
+  'false'   |
+  'new'     |
+  'null'    |
+  'return'  |
+  'true'    |
+  'var'     |
+  'for'     |
+  'while'   |
+  'integer' |
+  'float'   |
+  'boolean' |
+  'unknown' |
+  'else'    |
+  'if'      |
 
-<assignment-expression> ::= <conditional-expression>
-                          | <unary-expression> <assignment-operator> <assignment-expression>
 
-<assignment-operator> ::= =
-                        | *=
-                        | /=
-                        | %=
-                        | +=
-                        | -=
-                        | <<=
-                        | >>=
-                        | &=
-                        | ^=
-                        | |=
-
-
-[ ] операторы присвоения;
+[X] операторы присвоения;
 [X] условный оператор;
 [X] оператор цикла;
 
-[ ] операторы ввода и вывода на экран;
 [X] поддержка целочисленных, вещественных переменных;
 [ ] поддержка арифметических операций с числами;
-[ ] поддержка одномерных числовых массивов;
-[ ] возможность написания комментариев.
+[X] возможность написания комментариев.
