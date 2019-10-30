@@ -68,17 +68,12 @@ __@bnf__
 
 
 \<reserved-words> ::=
-  'false'   |
-  'new'     |
-  'null'    |
-  'return'  |
-  'true'    |
-  'var'     |
-  'for'     |
-  'while'   |
-  'integer' |
-  'float'   |
-  'boolean' |
-  'unknown' |
-  'else'    |
-  'if'      |
+  | 'false'
+  | 'true'
+  | 'while'
+  | 'integer'
+  | 'float'
+  | 'boolean'
+  | 'unknown'
+  | 'else'
+  | 'if'
