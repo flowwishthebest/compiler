@@ -1,4 +1,4 @@
-__Syntax BNF__
+__@bnf__
 
 \<letter-uppercase> ::= A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z \
 \<letter-lowercase> ::= a | b | c | d | e | f | g | h | i | j | k | l | m | n | o | p | q | r | s | t | u | v | w | x | y | z \
@@ -32,18 +32,19 @@ __Syntax BNF__
 
 \<declarator>           ::= \<type-qualifier> \<direct-declarator> \
 \<type-qualifier>       ::= 'integer' | 'float' | 'boolean' | 'unknown' \
-\<direct-declarator>    ::= \<identifier> | (\<declarator>) \
+\<direct-declarator>    ::= \<identifier> | (\<declarator>) \ | \<direct-declarator> [ {\<constant-expression>}? ] \
 \<declarator-statement> ::= \<declarator> | \<declarator> \<assignment-operator> \<initializer> \
 \<initializer>          ::= \<assignment-expression>
 
 
-<primary-expression> ::= <identifier> | <constant> | (<expression>) \
-<constant>           ::= <integer-constant> | <boolean-constant> | <floating-constant>
-<expression>         ::= <assignment-expression> | <expression> \<comma-symb> <assignment-expression>
+\<primary-expression> ::= \<identifier> | \<constant> | (\<expression>) \
+\<constant>           ::= \<integer-constant> | \<boolean-constant> | \<floating-constant> \
+\<expression>         ::= \<assignment-expression> | \<expression> \<comma-symb> \<assignment-expression>
 
 
-<add-expr> ::= \<multi-expr> | \<add-expr> + \<multi-expr> | \<add-expr> - \<multi-expr>
-<multi-expr> ::= \<multi-expr> * <cast-expr> | \<multi-expr> / \<cast-expr>
+\<add-expr>            ::= \<multi-expr> | \<add-expr> + \<multi-expr> | \<add-expr> - \<multi-expr> \
+\<multi-expr>          ::= \<multi-expr> * <cast-expr> | \<multi-expr> / \<cast-expr> \
+\<constant-expression> ::= \<multi-expr> | \<add-expr>
 
 
 \<statement>              ::= \<iteration-statement> | \<conditional-statement> \
@@ -60,8 +61,8 @@ __Syntax BNF__
 \<\_\_elseifpart__>         ::= else if (\<expression>) '{' \<statement-list> '}' \
 \<\_\_elsepart__>           ::= else '{' \<statement-list> '}'
 
-<single-line-comment> ::= '//'
-<text-comment>        ::= '/*' '*/'
+\<single-line-comment> ::= '//' \
+\<text-comment>        ::= '\/\*' '\*\/'
 
 
 \<reserved-words> ::=
@@ -79,12 +80,3 @@ __Syntax BNF__
   'unknown' |
   'else'    |
   'if'      |
-
-
-[X] операторы присвоения;
-[X] условный оператор;
-[X] оператор цикла;
-
-[X] поддержка целочисленных, вещественных переменных;
-[ ] поддержка арифметических операций с числами;
-[X] возможность написания комментариев.
