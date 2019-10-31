@@ -20,15 +20,15 @@ __@bnf__
 \<exp-symb>       ::= 'E' | 'e'
 
 
-\<integer-part>        ::=  \<digit> { \<digit> }\
-\<integer>             ::=  [\<plus-symb> | \<minus-symb>] \<integer-part> \
+\<intpart>             ::=  \<digit> { \<digit> }\
+\<integer>             ::=  [\<plus-symb> | \<minus-symb>] \<intpart> \
 \<fraction>            ::=  \<dot-symb> \<intpart> \
 \<exponent>            ::=  \<exp-symb> \<integer> \
 \<point-float>         ::=  \<integer> \<fraction> | \<integer> \<dot> \
 \<exponent-float>      ::=  (\<integer> | \<point-float>) \<exponent>
 
 
-\<assignment-operator> ::= '=' \
+\<assignment-operator>.   ::= '=' \
 \<assignment-expression>  ::= \<assignment-operator> \<assignment-expression>
 
 
