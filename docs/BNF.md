@@ -34,7 +34,7 @@ __@bnf__
 
 \<declarator>           ::= \<type-qualifier> \<direct-declarator> \
 \<type-qualifier>       ::= 'integer' | 'float' | 'boolean' | 'unknown' \
-\<direct-declarator>    ::= \<identifier> | (\<declarator>) \ | \<direct-declarator> [ {\<constant-expression>}? ] \
+\<direct-declarator>    ::= \<identifier> | (\<declarator>) | \<direct-declarator> [ { \<constant> } ] \
 \<declarator-statement> ::= \<declarator> | \<declarator> \<assignment-operator> \<initializer> \
 \<initializer>          ::= \<assignment-expression>
 
