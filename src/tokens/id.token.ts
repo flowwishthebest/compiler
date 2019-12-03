@@ -1,10 +1,8 @@
+import { Token } from './token';
 import { ETokenType, IToken } from './token.interface';
 
-export class Id implements IToken {
-  public readonly value: string;
-  public readonly type: ETokenType = ETokenType.ID;
-
-  constructor(id: string) {
-    this.value = id;
-  }
+export class Id extends Token implements IToken {
+    constructor(id: string) {
+        super(ETokenType.ID, id);
+    }
 }

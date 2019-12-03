@@ -1,6 +1,8 @@
+import { Token } from './token';
 import { ETokenType, IToken } from './token.interface';
 
-export class If implements IToken {
-    public readonly value = null;
-    public readonly type: ETokenType = ETokenType.AND;
+export class If extends Token implements IToken {
+    constructor() {
+        super(ETokenType.IF, null);
+    }
 }

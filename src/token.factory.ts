@@ -1,4 +1,4 @@
-import { And, False, If, True, While } from './tokens';
+import { And, Eof, False, If, True, While } from './tokens';
 import { ETokenType, IToken } from './tokens/token.interface';
 
 export interface ITokenFactory {
@@ -23,6 +23,9 @@ export class TokenFactory implements ITokenFactory {
             }
             case ETokenType.WHILE: {
                 return new While();
+            }
+            case ETokenType.EOF: {
+                return new Eof();
             }
             default: {
                 throw new Error(`Unknown token type <${type}>`);

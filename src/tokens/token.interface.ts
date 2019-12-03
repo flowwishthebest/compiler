@@ -10,4 +10,5 @@ export enum ETokenType {
     WHILE = 'WHILE',
     TRUE = 'TRUE',
     FALSE = 'FALSE',
+    EOF = 'EOF',
 }

@@ -1,4 +1,6 @@
-import { greet } from './helpers/greet.helper';
+import { Lexer } from './lexer';
 
-// tslint:disable-next-line
-console.log(greet());
+function main(): void {
+    // tslint:disable-next-line
+    console.log(new Lexer(`int a = 3`));
+}
