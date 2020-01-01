@@ -1,7 +1,7 @@
-import { Token } from './token';
-import { ETokenType, IToken } from './token.interface';
+import { Token } from './abstract.token';
+import { ETokenType } from './token.interface';
 
-export class True extends Token implements IToken {
+export class TrueToken extends Token<boolean> {
     constructor() {
         super(ETokenType.TRUE, true);
     }

@@ -1,8 +1,8 @@
-import { Token } from './token';
-import { ETokenType, IToken } from './token.interface';
+import { Token } from './abstract.token';
+import { ETokenType } from './token.interface';
 
-export class While extends Token implements IToken {
+export class WhileToken extends Token<void> {
     constructor() {
-        super(ETokenType.WHILE, null);
+        super(ETokenType.WHILE);
     }
 }

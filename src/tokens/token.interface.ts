@@ -1,14 +1,25 @@
-export interface IToken {
-    readonly type: ETokenType;
-    readonly value: any;
-}
-
 export enum ETokenType {
-    AND = 'AND',
+    NUM = 'NUM',
     ID = 'ID',
     IF = 'IF',
+    ELSE = 'ELSE',
     WHILE = 'WHILE',
+    DO = 'DO',
+    LBRA = 'LBRA',
+    RBRA = 'RBRA',
+    LPAR = 'LPAR',
+    RPAR = 'RPAR',
+    PLUS = 'PLUS',
+    MINUS = 'MINUS',
+    LESS = 'LESS',
+    EQUAL = 'EQUAL',
+    SEMICOLON = 'SEMICOLON',
+    EOF = 'EOF',
     TRUE = 'TRUE',
     FALSE = 'FALSE',
-    EOF = 'EOF',
+}
+
+export interface IToken<T = any> {
+    getType(): ETokenType;
+    getValue(): T;
 }

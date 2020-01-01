@@ -1,8 +1,8 @@
-import { Token } from './token';
-import { ETokenType, IToken } from './token.interface';
+import { Token } from './abstract.token';
+import { ETokenType } from './token.interface';
 
-export class If extends Token implements IToken {
+export class IfToken extends Token<void> {
     constructor() {
-        super(ETokenType.IF, null);
+        super(ETokenType.IF);
     }
 }
