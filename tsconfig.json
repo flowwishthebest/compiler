@@ -11,6 +11,6 @@
       "node_modules/"
     ],
     "include": [
-      "src/"
+      "src/", "packages/scanner/src/tokens", "packages/scanner/src/scanner.interface.ts", "packages/scanner/src/scanner.ts", "packages/scanner/src/errors", "packages/scanner/src/program.ts", "packages/scanner/src/constants.ts"
     ]
   }

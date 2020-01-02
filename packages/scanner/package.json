@@ -1,0 +1,8 @@
+{
+    "name": "@tfp/scanner",
+    "version": "0.0.1",
+    "description": "Theoretical foundations of programming",
+    "main": "src/index.js",
+    "author": "Ilya P. <togowiththeflow@gmail.com>",
+    "license": "MIT"
+}
