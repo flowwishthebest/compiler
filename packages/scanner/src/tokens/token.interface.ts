@@ -17,6 +17,8 @@ export enum ETokenType {
     EOF = 'EOF',
     TRUE = 'TRUE',
     FALSE = 'FALSE',
+    MUL = 'MUL',
+    DIV = 'DIV',
 }
 
 export interface IToken<T = any> {

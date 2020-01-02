@@ -11,7 +11,8 @@
     "coverage": "cat ./coverage/lcov.info | coveralls",
     "build": "tsc",
     "lint": "tslint -p ./tsconfig.json -c ./tslint.json",
-    "prettify": "prettier --config ./prettierrc.json --write '{src,__tests__}/**/*.ts'"
+    "prettify": "prettier --config ./prettierrc.json --write '{src,__tests__}/**/*.ts'",
+    "lerna": "lerna"
   },
   "keywords": [
     "computer science",
@@ -31,5 +32,7 @@
     "tslint": "5.20.0",
     "typescript": "3.6.4"
   },
-  "dependencies": {}
+  "dependencies": {
+    "lerna": "^3.20.1"
+  }
 }

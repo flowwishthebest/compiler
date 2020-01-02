@@ -35,7 +35,9 @@ export class Scanner implements IScanner {
             .set('+', '+')
             .set('-', '-')
             .set('<', '<')
-            .set('=', '=');
+            .set('=', '=')
+            .set('*', '*')
+            .set('/', '/');
     }
 
     public * getTokensLazy(): Generator<IToken> {
@@ -80,6 +82,8 @@ export class Scanner implements IScanner {
                 throw new Error(`Unexpected token ${this.currentChar}`);
             }
         }
+
+        yield this.tokenFactory.createEof();
     }
 
     private _getNextChar(): void {

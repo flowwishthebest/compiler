@@ -19,6 +19,8 @@ import { SemicolonToken } from './semicolon.token';
 import { IToken } from './token.interface';
 import { TrueToken } from './true.token';
 import { WhileToken } from './while.token';
+import { MulToken } from './mul.token';
+import { DivToken } from './div.token';
 
 export class TokenFactory {
 
@@ -45,6 +47,8 @@ export class TokenFactory {
             case '-': { return new MinusToken(); }
             case '<': { return new LessToken(); }
             case '=': { return new EqualToken(); }
+            case '*': { return new MulToken(); }
+            case '/': { return new DivToken(); }
             default: { throw new UnknownSymbolError(symb); }
         }
     }
