@@ -1,72 +1,27 @@
-// tslint:disable
-
-import { IToken } from '../../scanner/src/tokens/token.interface';
-import { IScanner } from '../../scanner/src/scanner.interface';
-import { IntegerToken } from '../../scanner/src/tokens/interger.token';
-import { LParToken } from '../../scanner/src/tokens/lpar.token';
-import { RParToken } from '../../scanner/src/tokens/rpar.token';
-import { MulToken } from '../../scanner/src/tokens/mul.token';
-import { DivToken } from '../../scanner/src/tokens/div.token';
-import { PlusToken } from '../../scanner/src/tokens/plus.token';
-import { MinusToken } from '../../scanner/src/tokens/minus.token';
-import { Scanner } from '../../scanner/src/scanner';
-
-export interface INode {
-    getToken(): IToken;
-    getLeft(): INode;
-    getRight(): INode;
-}
-
-export abstract class Ast implements INode {
-
-    constructor(
-        private readonly token: IToken,
-        private readonly left?: INode,
-        private readonly right?: INode,
-    ) {}
-
-    public getToken(): IToken<any> {
-        return this.token;
-    }
-
-    public getLeft(): INode {
-        return this.left;
-    }
-
-    public getRight(): INode {
-        return this.right;
-    }
-}
-
-export class BinOpAst extends Ast {
-
-    constructor(token: IToken, left: INode,right: INode) {
-        super(token, left, right);
-    }
-}
-
-export class NumAst extends Ast {
-
-    constructor(token: IToken) {
-        super(token);
-    }
-}
-
-export interface IParser {
-    parse(): any;
-}
+import { BinOpAst, INode, IParser, NumAst } from '../../../parser/src';
+import { IScanner } from '../scanner.interface';
+import { DivToken } from '../tokens/div.token';
+import { IntegerToken } from '../tokens/interger.token';
+import { LParToken } from '../tokens/lpar.token';
+import { MinusToken } from '../tokens/minus.token';
+import { MulToken } from '../tokens/mul.token';
+import { PlusToken } from '../tokens/plus.token';
+import { RParToken } from '../tokens/rpar.token';
+import { IToken } from '../tokens/token.interface';
 
 export class Parser implements IParser {
 
     private currentToken: IToken;
     private tokenGenerator: Generator<IToken>;
 
-    constructor(
-        private readonly scanner: IScanner,
-    ) {
+    constructor(scanner: IScanner) {
         this.tokenGenerator = scanner.getTokensLazy();
 
-        this.currentToken = this.tokenGenerator.next().value();
+        this.currentToken = this.tokenGenerator.next().value;
+    }
+
+    public parse(): INode {
+        return this._expr();
     }
 
     /**
@@ -74,7 +29,7 @@ export class Parser implements IParser {
      * type and if they match then "eat" the current token
      * and assign the next token to the self.current_token,
      * otherwise raise an exception.
-    */
+     */
     private _eat(token: IToken): void {
         if (this.currentToken.getType() === token.getType()) {
             this.currentToken = this.tokenGenerator.next().value;
@@ -147,18 +102,4 @@ export class Parser implements IParser {
 
         return node;
     }
-
-    public parse(): INode {
-        return this._expr();
-    }
 }
-
-export function oneme() {
-    const parser = new Parser(
-        new Scanner('7 + 2 * 3'),
-    );
-
-    console.log(parser.parse());
-}
-
-oneme();

@@ -1,5 +1,6 @@
 import { UnknownKeywordError } from '../errors/scanner/unknown-keyword.error';
 import { UnknownSymbolError } from '../errors/scanner/unknown-symbol.error';
+import { DivToken } from './div.token';
 import { DoToken } from './do.token';
 import { ElseToken } from './else.token';
 import { EofToken } from './eof.token';
@@ -12,6 +13,7 @@ import { LBraToken } from './lbra.token';
 import { LessToken } from './less.token';
 import { LParToken } from './lpar.token';
 import { MinusToken } from './minus.token';
+import { MulToken } from './mul.token';
 import { PlusToken } from './plus.token';
 import { RBraToken } from './rbra.token';
 import { RParToken } from './rpar.token';
@@ -19,8 +21,6 @@ import { SemicolonToken } from './semicolon.token';
 import { IToken } from './token.interface';
 import { TrueToken } from './true.token';
 import { WhileToken } from './while.token';
-import { MulToken } from './mul.token';
-import { DivToken } from './div.token';
 
 export class TokenFactory {
 
