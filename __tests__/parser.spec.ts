@@ -1,0 +1,27 @@
+import { Parser, Tokenizer } from '../packages/test';
+
+test('Add op', () => {
+    const parser = new Parser(new Tokenizer('1 + 2'));
+
+    expect(parser.parse()).toEqual(3);
+});
+
+test('Subtract op', () => {
+    const parser = new Parser(new Tokenizer('1 - 2'));
+
+    expect(parser.parse()).toEqual(-1);
+});
+
+test('Unsupported op throw error', () => {
+    const parser = new Parser(new Tokenizer('1 * 2'));
+
+    let thrownError;
+    try {
+        parser.parse();
+    } catch (err) {
+        thrownError = err;
+    }
+
+    expect(thrownError).toBeDefined();
+    expect(thrownError.message).toEqual('Unsupported token type *');
+});

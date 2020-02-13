@@ -1,5 +1,10 @@
-import { INode } from '../../../parser/src';
 import { IToken } from '../tokens/token.interface';
+
+export interface INode {
+    getToken(): IToken;
+    getLeft(): INode;
+    getRight(): INode;
+}
 
 export abstract class Ast implements INode {
 

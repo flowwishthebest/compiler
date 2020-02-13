@@ -1,8 +1,11 @@
-import { BinOpAst, INode, NumAst } from '../../../parser/src';
 import { DivToken } from '../tokens/div.token';
 import { MinusToken } from '../tokens/minus.token';
 import { MulToken } from '../tokens/mul.token';
 import { PlusToken } from '../tokens/plus.token';
+import { INode } from './abstract.ast';
+import { BinOpAst } from './bin-op.ast';
+import { NumAst } from './num.ast';
+import { UnaryOpAst } from './unary-op.ast';
 
 export class NodeVisitor {
 
@@ -11,6 +14,8 @@ export class NodeVisitor {
             return this._visitBinOpAst(node);
         } else if (node instanceof NumAst) {
             return this._visitNumAst(node);
+        } else if (node instanceof UnaryOpAst) {
+            return this._visitUnaryOpAst(node);
         } else {
             return this._genericVisit(node);
         }
@@ -36,6 +41,17 @@ export class NodeVisitor {
             return this.visit(left) / this.visit(right);
         } else {
             return this._genericVisit(node);
+        }
+    }
+
+    private _visitUnaryOpAst(node: INode): any {
+        const token = node.getToken();
+        const expr = this.visit(node.getLeft());
+
+        if (token instanceof PlusToken) {
+            return +expr;
+        } else if (token instanceof MinusToken) {
+            return -expr;
         }
     }
 

@@ -1,5 +1,5 @@
-import { Ast, INode } from '../../../parser/src';
 import { IToken } from '../tokens/token.interface';
+import { Ast, INode } from './abstract.ast';
 
 export class BinOpAst extends Ast {
 

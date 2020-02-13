@@ -1,5 +1,5 @@
-import { UnknownKeywordError } from '../errors/scanner/unknown-keyword.error';
-import { UnknownSymbolError } from '../errors/scanner/unknown-symbol.error';
+import { UnknownKeywordError } from '../unknown-keyword.error';
+import { UnknownSymbolError } from '../unknown-symbol.error';
 import { DivToken } from './div.token';
 import { DoToken } from './do.token';
 import { ElseToken } from './else.token';
