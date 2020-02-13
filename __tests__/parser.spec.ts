@@ -26,3 +26,9 @@ test('Unsupported op throw error', () => {
     expect(thrownError).toBeDefined();
     expect(thrownError.message).toEqual('Unsupported token type *');
 });
+
+test('Can handle much operands', () => {
+    const parser = new Parser(new Tokenizer('1 + 2 + 3 + 4'));
+
+    expect(parser.parse()).toEqual(10);
+});
