@@ -1,6 +1,10 @@
 {
     "extends": "tslint:recommended",
     "rules": {
-      "quotemark": [true, "single"]
+      "quotemark": [true, "single"],
+      "variable-name": [
+        true,
+        "allow-leading-underscore"
+      ]
     }
   }

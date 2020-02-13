@@ -1,18 +1,4 @@
-// tslint:disable
-
-enum ETokenType {
-    EOF = 'EOF',
-    NUMBER = 'NUMBER',
-    PLUS = 'PLUS',
-    MINUS = 'MINUS',
-}
-
-class Token {
-    constructor(
-        public readonly type: ETokenType,
-        public readonly value?: any,
-    ) {}
-}
+import { ETokenType, Token } from './token';
 
 export class Tokenizer {
     // @lexer = Source code to [token, ..., token]
@@ -30,13 +16,9 @@ export class Tokenizer {
         // "1 + 2"
 
         while (this._currentChar) {
-            if (this._isWhiteSpace(this._currentChar)) {
-                // skip
 
-                while (this._currentChar && this._isWhiteSpace(this._currentChar)) {
-                    this._toNextChar();
-                }
-                
+            if (this._isWhiteSpace(this._currentChar)) {
+                this._skipWhiteSpaces();
                 continue;
             }
 
@@ -73,49 +55,17 @@ export class Tokenizer {
     }
 
     private _isDigit(char: string): boolean {
-        return '0' <= char && char <= '9' 
+        return '0' <= char && char <= '9';
+    }
+
+    private _skipWhiteSpaces(): void {
+        while (this._currentChar && this._isWhiteSpace(this._currentChar)) {
+            this._toNextChar();
+        }
     }
 
     private _toNextChar(): void {
         this._position += 1;
         this._currentChar = this._sourceCode[this._position];
-    }
-}
-
-export class Parser {
-    // @Parser = [token, ..., token] -> ast
-
-    private _currentToken: Token;
-
-    constructor(
-        private readonly _tokenizer: Tokenizer,
-    ) {
-        this._currentToken = _tokenizer.getNextToken();
-    }
-
-    public parse(): any {
-        const left = this._currentToken;
-
-        this._currentToken = this._tokenizer.getNextToken();
-
-        const op = this._currentToken;
-
-        this._currentToken = this._tokenizer.getNextToken();
-
-        const right = this._currentToken;
-
-        this._currentToken = this._tokenizer.getNextToken();
-
-        if (this._currentToken.type === ETokenType.EOF) {
-            if (op.type === ETokenType.PLUS) {
-                return left.value + right.value;
-            }
-            
-            if (op.type === ETokenType.MINUS) {
-                return left.value - right.value;
-            }
-        } else {
-            throw new Error('Too much operands');
-        }
     }
 }

@@ -1,4 +1,5 @@
-import { Parser, Tokenizer } from '../packages/test';
+import { Parser } from '../packages/parser';
+import { Tokenizer } from '../packages/tokenizer';
 
 test('Add op', () => {
     const parser = new Parser(new Tokenizer('1 + 2'));

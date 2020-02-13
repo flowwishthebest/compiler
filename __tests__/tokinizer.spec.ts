@@ -1,4 +1,4 @@
-import { Tokenizer } from '../packages/test';
+import { Tokenizer } from '../packages/tokenizer';
 
 test('Read right', () => {
     const t = new Tokenizer('1+3');
