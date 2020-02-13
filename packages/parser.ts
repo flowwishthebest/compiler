@@ -13,28 +13,32 @@ export class Parser {
     }
 
     public parse(): any {
-        const left = this._currentToken;
+
+        let result = this._currentToken.value;
 
         this._currentToken = this._tokenizer.getNextToken();
 
-        const op = this._currentToken;
+        while (
+            this._currentToken.type === ETokenType.MINUS
+            || this._currentToken.type === ETokenType.PLUS
+        ) {
+            const op = this._currentToken;
 
-        this._currentToken = this._tokenizer.getNextToken();
-
-        const right = this._currentToken;
-
-        this._currentToken = this._tokenizer.getNextToken();
-
-        if (this._currentToken.type === ETokenType.EOF) {
             if (op.type === ETokenType.PLUS) {
-                return left.value + right.value;
-            }
+                this._currentToken = this._tokenizer.getNextToken();
 
-            if (op.type === ETokenType.MINUS) {
-                return left.value - right.value;
+                result += this._currentToken.value;
+
+                this._currentToken = this._tokenizer.getNextToken();
+            } else if (op.type === ETokenType.MINUS) {
+                this._currentToken = this._tokenizer.getNextToken();
+
+                result -= this._currentToken.value;
+
+                this._currentToken = this._tokenizer.getNextToken();
             }
-        } else {
-            throw new Error('Too much operands');
         }
+
+        return result;
     }
 }
