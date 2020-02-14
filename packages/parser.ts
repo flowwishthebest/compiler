@@ -52,6 +52,8 @@ export class Parser {
     }
 
     private _term(): number {
+        equal(this._currentToken.getType(), ETokenType.NUMBER);
+
         let result = this._currentToken.getValue();
 
         this._currentToken = this._tokenizer.getNextToken();
