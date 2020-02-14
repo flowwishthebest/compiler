@@ -11,6 +11,7 @@
     "coverage": "cat ./coverage/lcov.info | coveralls",
     "build": "tsc",
     "lint": "tslint -p ./tsconfig.json -c ./tslint.json",
+    "lint:fix": "tslint --fix -p ./tsconfig.json -c ./tslint.json",
     "prettify": "prettier --config ./prettierrc.json --write '{src,__tests__}/**/*.ts'",
     "lerna": "lerna",
     "start": "node dist/main.js",

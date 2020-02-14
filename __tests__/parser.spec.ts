@@ -12,56 +12,60 @@
 import { Parser } from '../packages/parser';
 import { Tokenizer } from '../packages/tokenizer';
 
-test('Add op', () => {
-    const parser = new Parser(new Tokenizer('1 + 2'));
+describe('Parser tests', () => {
 
-    const result = parser.parse();
+    test('Add op', () => {
+        const parser = new Parser(new Tokenizer('1 + 2'));
 
-    expect(result).toEqual(3);
-});
+        const result = parser.parse();
 
-test('Subtract op', () => {
-    const parser = new Parser(new Tokenizer('1 - 2'));
+        expect(result).toEqual(3);
+    });
 
-    const result = parser.parse();
+    test('Subtract op', () => {
+        const parser = new Parser(new Tokenizer('1 - 2'));
 
-    expect(result).toEqual(-1);
-});
+        const result = parser.parse();
 
-test('Unsupported op throw error', () => {
-    const parser = new Parser(new Tokenizer('1 & 2'));
+        expect(result).toEqual(-1);
+    });
 
-    let thrownError;
-    try {
-        parser.parse();
-    } catch (err) {
-        thrownError = err;
-    }
+    test('Unsupported op throw error', () => {
+        const parser = new Parser(new Tokenizer('1 & 2'));
 
-    expect(thrownError).toBeDefined();
-    expect(thrownError.message).toEqual('Unsupported token type &');
-});
+        let thrownError;
+        try {
+            parser.parse();
+        } catch (err) {
+            thrownError = err;
+        }
 
-test('Can handle much operands', () => {
-    const parser = new Parser(new Tokenizer('1 + 2 + 3 + 4'));
+        expect(thrownError).toBeDefined();
+        expect(thrownError.message).toEqual('Unsupported token type &');
+    });
 
-    const result = parser.parse();
+    test('Can handle much operands', () => {
+        const parser = new Parser(new Tokenizer('1 + 2 + 3 + 4'));
 
-    expect(result).toEqual(10);
-});
+        const result = parser.parse();
 
-test('Can handle much operands', () => {
-    const parser = new Parser(new Tokenizer('1 + 2 * 3 + 4'));
+        expect(result).toEqual(10);
+    });
 
-    const result = parser.parse();
+    test('Can handle much operands', () => {
+        const parser = new Parser(new Tokenizer('1 + 2 * 3 + 4'));
 
-    expect(result).toEqual(11);
-});
+        const result = parser.parse();
 
-test('Can handle much operands', () => {
-    const parser = new Parser(new Tokenizer('1 + 2 * 20 + 4 / 4'));
+        expect(result).toEqual(11);
+    });
 
-    const result = parser.parse();
+    test('Can handle much operands', () => {
+        const parser = new Parser(new Tokenizer('1 + 2 * 20 + 4 / 4'));
 
-    expect(result).toEqual(42);
+        const result = parser.parse();
+
+        expect(result).toEqual(42);
+    });
+
 });
