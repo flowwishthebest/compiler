@@ -14,7 +14,7 @@ test('Subtract op', () => {
 });
 
 test('Unsupported op throw error', () => {
-    const parser = new Parser(new Tokenizer('1 * 2'));
+    const parser = new Parser(new Tokenizer('1 & 2'));
 
     let thrownError;
     try {
@@ -24,7 +24,13 @@ test('Unsupported op throw error', () => {
     }
 
     expect(thrownError).toBeDefined();
-    expect(thrownError.message).toEqual('Unsupported token type *');
+    expect(thrownError.message).toEqual('Unsupported token type &');
+});
+
+test('Can handle much operands', () => {
+    const parser = new Parser(new Tokenizer('1 + 2 + 3 + 4'));
+
+    expect(parser.parse()).toEqual(10);
 });
 
 test('Can handle much operands', () => {

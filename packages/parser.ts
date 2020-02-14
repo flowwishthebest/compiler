@@ -1,5 +1,8 @@
-import { ETokenType, Token } from './token';
 import { Tokenizer } from './tokenizer';
+import { MinusToken } from './tokens/minus.token';
+import { NumberToken } from './tokens/number.token';
+import { PlusToken } from './tokens/plus.token';
+import { Token } from './tokens/token';
 
 export class Parser {
     // @Parser = [token, ..., token] -> ast
@@ -14,26 +17,29 @@ export class Parser {
 
     public parse(): any {
 
-        let result = this._currentToken.value;
+        let result = this._currentToken.getValue();
 
         this._currentToken = this._tokenizer.getNextToken();
 
-        while (
-            this._currentToken.type === ETokenType.MINUS
-            || this._currentToken.type === ETokenType.PLUS
+        while (this._currentToken instanceof MinusToken
+            || this._currentToken instanceof PlusToken
         ) {
             const op = this._currentToken;
 
-            if (op.type === ETokenType.PLUS) {
+            if (op instanceof PlusToken) {
                 this._currentToken = this._tokenizer.getNextToken();
 
-                result += this._currentToken.value;
+                if (this._currentToken instanceof NumberToken) {
+                    result += this._currentToken.getValue();
+                }
 
                 this._currentToken = this._tokenizer.getNextToken();
-            } else if (op.type === ETokenType.MINUS) {
+            } else if (op instanceof MinusToken) {
                 this._currentToken = this._tokenizer.getNextToken();
 
-                result -= this._currentToken.value;
+                if (this._currentToken instanceof NumberToken) {
+                    result -= this._currentToken.getValue();
+                }
 
                 this._currentToken = this._tokenizer.getNextToken();
             }
