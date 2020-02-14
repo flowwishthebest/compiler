@@ -1,19 +1,22 @@
-import { ETokenType, Token } from './token';
+import { DivToken } from './tokens/div.token';
+import { EOFToken } from './tokens/eof.token';
+import { MinusToken } from './tokens/minus.token';
+import { MulToken } from './tokens/mul.token';
+import { NumberToken } from './tokens/number.token';
+import { PlusToken } from './tokens/plus.token';
+import { Token } from './tokens/token';
 
+// @lexer = Source code to [token, ..., token]
 export class Tokenizer {
-    // @lexer = Source code to [token, ..., token]
 
     private _position: number = 0;
     private _currentChar: string;
 
-    constructor(
-        private readonly _sourceCode: string,
-    ) {
+    constructor(private readonly _sourceCode: string) {
         this._currentChar = this._sourceCode[this._position];
     }
 
     public getNextToken(): Token {
-        // "1 + 2"
 
         while (this._currentChar) {
 
@@ -31,23 +34,33 @@ export class Tokenizer {
                     this._toNextChar();
                 }
 
-                return new Token(ETokenType.NUMBER, parseFloat(interger.join('')));
+                return new NumberToken(parseFloat(interger.join('')));
             }
 
             if (this._currentChar === '+') {
                 this._toNextChar();
-                return new Token(ETokenType.PLUS);
+                return new PlusToken();
             }
 
             if (this._currentChar === '-') {
                 this._toNextChar();
-                return new Token(ETokenType.MINUS);
+                return new MinusToken();
+            }
+
+            if (this._currentChar === '*') {
+                this._toNextChar();
+                return new MulToken();
+            }
+
+            if (this._currentChar === '/') {
+                this._toNextChar();
+                return new DivToken();
             }
 
             throw new Error('Unsupported token type ' + this._currentChar);
         }
 
-        return new Token(ETokenType.EOF);
+        return new EOFToken();
     }
 
     private _isWhiteSpace(char: string): boolean {
