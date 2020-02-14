@@ -6,6 +6,19 @@ import { NumberToken } from './tokens/number.token';
 import { PlusToken } from './tokens/plus.token';
 import { Token } from './tokens/token';
 
+function isDigit(char: string): boolean {
+    return '0' <= char && char <= '9';
+}
+
+function isWhiteSpace(char: string): boolean {
+    return char === ' ';
+}
+
+const PLUS_SIGN = '+';
+const DIV_SIGN = '/';
+const MINUS_SIGN = '-';
+const MUL_SIGN = '*';
+
 // @lexer = Source code to [token, ..., token]
 export class Tokenizer {
 
@@ -13,72 +26,60 @@ export class Tokenizer {
     private _currentChar: string;
 
     constructor(private readonly _sourceCode: string) {
-        this._currentChar = this._sourceCode[this._position];
+        this._currentChar = this._sourceCode.charAt(this._position);
     }
 
     public getNextToken(): Token {
 
         while (this._currentChar) {
 
-            if (this._isWhiteSpace(this._currentChar)) {
-                this._skipWhiteSpaces();
+            if (isWhiteSpace(this._currentChar)) {
+                this._toNextChar();
                 continue;
             }
 
-            if (this._isDigit(this._currentChar)) {
+            if (isDigit(this._currentChar)) {
                 const interger = [];
 
-                while (this._currentChar && this._isDigit(this._currentChar)) {
+                while (this._currentChar && isDigit(this._currentChar)) {
                     interger.push(this._currentChar);
 
                     this._toNextChar();
                 }
 
-                return new NumberToken(parseFloat(interger.join('')));
+                const i = parseFloat(interger.join(''));
+
+                return new NumberToken(i);
             }
 
-            if (this._currentChar === '+') {
-                this._toNextChar();
-                return new PlusToken();
+            switch (this._currentChar) {
+                case PLUS_SIGN: {
+                    this._toNextChar();
+                    return new PlusToken();
+                }
+                case MINUS_SIGN: {
+                    this._toNextChar();
+                    return new MinusToken();
+                }
+                case MUL_SIGN: {
+                    this._toNextChar();
+                    return new MulToken();
+                }
+                case DIV_SIGN: {
+                    this._toNextChar();
+                    return new DivToken();
+                }
+                default: {
+                    throw new Error(`Unsupported token type ${this._currentChar}`);
+                }
             }
-
-            if (this._currentChar === '-') {
-                this._toNextChar();
-                return new MinusToken();
-            }
-
-            if (this._currentChar === '*') {
-                this._toNextChar();
-                return new MulToken();
-            }
-
-            if (this._currentChar === '/') {
-                this._toNextChar();
-                return new DivToken();
-            }
-
-            throw new Error('Unsupported token type ' + this._currentChar);
         }
 
         return new EOFToken();
     }
 
-    private _isWhiteSpace(char: string): boolean {
-        return char === ' ';
-    }
-
-    private _isDigit(char: string): boolean {
-        return '0' <= char && char <= '9';
-    }
-
-    private _skipWhiteSpaces(): void {
-        while (this._currentChar && this._isWhiteSpace(this._currentChar)) {
-            this._toNextChar();
-        }
-    }
-
     private _toNextChar(): void {
         this._position += 1;
-        this._currentChar = this._sourceCode[this._position];
+        this._currentChar = this._sourceCode.charAt(this._position);
     }
 }
