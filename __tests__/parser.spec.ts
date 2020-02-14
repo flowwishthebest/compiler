@@ -39,3 +39,10 @@ test('Can handle much operands', () => {
     const result = parser.parse();
     expect(result).toEqual(11);
 });
+
+test('Can handle much operands', () => {
+    const parser = new Parser(new Tokenizer('1 + 2 * 20 + 4 / 4'));
+
+    const result = parser.parse();
+    expect(result).toEqual(42);
+});

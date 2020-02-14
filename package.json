@@ -2,7 +2,7 @@
   "name": "@flowwishthebest/tfp",
   "version": "0.0.1",
   "description": "Theoretical foundations of programming",
-  "main": "src/index.js",
+  "main": "dist/main.js",
   "directories": {
     "doc": "docs"
   },
@@ -12,7 +12,9 @@
     "build": "tsc",
     "lint": "tslint -p ./tsconfig.json -c ./tslint.json",
     "prettify": "prettier --config ./prettierrc.json --write '{src,__tests__}/**/*.ts'",
-    "lerna": "lerna"
+    "lerna": "lerna",
+    "start": "node dist/main.js",
+    "debug": "node --inspect-brk=0.0.0.0 dist/main.js"
   },
   "keywords": [
     "computer science",

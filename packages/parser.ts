@@ -67,12 +67,16 @@ export class Parser {
                 if (this._currentToken instanceof NumberToken) {
                     result /= this._currentToken.getValue();
                 }
+
+                this._currentToken = this._tokenizer.getNextToken();
             } else if (op instanceof MulToken) {
                 this._currentToken = this._tokenizer.getNextToken();
 
                 if (this._currentToken instanceof NumberToken) {
                     result *= this._currentToken.getValue();
                 }
+
+                this._currentToken = this._tokenizer.getNextToken();
             }
         }
 
