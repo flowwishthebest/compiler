@@ -32,3 +32,9 @@ test('Can handle much operands', () => {
 
     expect(parser.parse()).toEqual(10);
 });
+
+test('Can handle much operands', () => {
+    const parser = new Parser(new Tokenizer('1 + 2 + 3 + 4'));
+
+    expect(parser.parse()).toEqual(10);
+});
