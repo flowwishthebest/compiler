@@ -4,7 +4,9 @@ import { MinusToken } from './tokens/minus.token';
 import { MulToken } from './tokens/mul.token';
 import { PlusToken } from './tokens/plus.token';
 import { Token } from './tokens/token';
-import { ETokenType } from './types/token.type';
+import { NumberToken } from './tokens/number.token';
+import { LParenToken } from './tokens/lparen.token';
+import { AST, BinOpAST, NumberAST } from './ast';
 
 export class Parser {
     // @Parser = [token, ..., token] -> ast
@@ -13,78 +15,75 @@ export class Parser {
 
     constructor(private readonly _tokenizer: Tokenizer) {}
 
-    public parse(): number {
+    public parse(): AST {
         return this._expr();
     }
 
-    private _expr(): number { // term ((PLUS | MINUS) term)*
+    private _expr(): AST { // term ((PLUS | MINUS) term)*
         if (!this._currentToken) {
             this._setNext();
         }
 
-        let result = this._term();
+        let node = this._term();
 
         while (
             this._currentToken instanceof MinusToken ||
             this._currentToken instanceof PlusToken
         ) {
-            if (this._currentToken instanceof PlusToken) {
+            const token = this._currentToken;
+
+            if (token instanceof PlusToken) {
                 this._setNext();
-                result += this._term();
-            } else if (this._currentToken instanceof MinusToken) {
+            } else if (token instanceof MinusToken) {
                 this._setNext();
-                result -= this._term();
             }
+
+            node = new BinOpAST(node, token, this._term());
         }
 
-        return result;
+        return node;
     }
 
-    private _factor(): number { // factor : INTEGER | LPAREN expr RPAREN
+    private _factor(): AST { // factor : INTEGER | LPAREN expr RPAREN
+        const token = this._currentToken;
 
-        const tokenType = this._currentToken.getType();
-
-        if (tokenType === ETokenType.NUMBER) {
-            const value = this._currentToken.getValue();
-
+        if (token instanceof NumberToken) {
             this._setNext();
-
-            return value;
+            return new NumberAST(token);
         }
 
-        if (tokenType === ETokenType.LPAREN) {
+        if (token instanceof LParenToken) {
             this._setNext(); // remove lparen
-
-            const result = this._expr();
-
+            const ast = this._expr();
             this._setNext(); // remove rparen
-
-            return result;
+            return ast;
         }
 
         throw new Error(
-            `Syntax error. Factor method got execp token ${this._currentToken}`
+            `Syntax error. Factor method got execp token ${this._currentToken}`,
         );
     }
 
-    private _term(): number { // factor ((MUL | DIV) factor)*
+    private _term(): AST { // factor ((MUL | DIV) factor)*
 
-        let result = this._factor();
+        let node = this._factor();
 
         while (
             this._currentToken instanceof DivToken ||
             this._currentToken instanceof MulToken
         ) {
-            if (this._currentToken instanceof DivToken) {
+            const token = this._currentToken;
+
+            if (token instanceof DivToken) {
                 this._setNext();
-                result /= this._factor();
-            } else if (this._currentToken instanceof MulToken) {
+            } else if (token instanceof MulToken) {
                 this._setNext();
-                result *= this._factor();
             }
+
+            node = new BinOpAST(node, token, this._factor());
         }
 
-        return result;
+        return node;
     }
 
     private _setNext(): void {
