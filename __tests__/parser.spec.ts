@@ -9,11 +9,10 @@
  * });
  */
 
-import { Parser } from '../packages/parser';
-import { Tokenizer } from '../packages/tokenizer';
+import { Parser } from '../src/parser';
+import { Tokenizer } from '../src/tokenizer';
 
 describe('Parser tests', () => {
-
     test('Add op', () => {
         const parser = new Parser(new Tokenizer('1 + 2'));
 
@@ -68,4 +67,11 @@ describe('Parser tests', () => {
         expect(result).toEqual(42);
     });
 
+    test('Operators associativity', () => {
+        const parser = new Parser(new Tokenizer('(1 + 2) * 20 + 4 / 4'));
+
+        const result = parser.parse();
+
+        expect(result).toEqual(61);
+    });
 });

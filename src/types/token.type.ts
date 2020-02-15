@@ -5,4 +5,6 @@ export enum ETokenType {
     MINUS = 'MINUS',
     MUL = 'MUL',
     DIV = 'DIV',
+    LPAREN = 'LPAREN',
+    RPAREN = 'RPAREN',
 }

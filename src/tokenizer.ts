@@ -1,9 +1,11 @@
 import { DivToken } from './tokens/div.token';
 import { EOFToken } from './tokens/eof.token';
+import { LParenToken } from './tokens/lparen.token';
 import { MinusToken } from './tokens/minus.token';
 import { MulToken } from './tokens/mul.token';
 import { NumberToken } from './tokens/number.token';
 import { PlusToken } from './tokens/plus.token';
+import { RParenToken } from './tokens/rparen.token';
 import { Token } from './tokens/token';
 
 function isDigit(char: string): boolean {
@@ -18,11 +20,12 @@ const PLUS_SIGN = '+';
 const DIV_SIGN = '/';
 const MINUS_SIGN = '-';
 const MUL_SIGN = '*';
+const LPAREN_SIGN = '(';
+const RPAREN_SIGN = ')';
 
 // @lexer = Source code to [token, ..., token]
 export class Tokenizer {
-
-    private _position: number = 0;
+    private _position = 0;
     private _currentChar: string;
 
     constructor(private readonly _sourceCode: string) {
@@ -30,9 +33,7 @@ export class Tokenizer {
     }
 
     public getNextToken(): Token {
-
         while (this._currentChar) {
-
             if (isWhiteSpace(this._currentChar)) {
                 this._toNextChar();
                 continue;
@@ -69,8 +70,18 @@ export class Tokenizer {
                     this._toNextChar();
                     return new DivToken();
                 }
+                case LPAREN_SIGN: {
+                    this._toNextChar();
+                    return new LParenToken();
+                }
+                case RPAREN_SIGN: {
+                    this._toNextChar();
+                    return new RParenToken();
+                }
                 default: {
-                    throw new Error(`Unsupported token type ${this._currentChar}`);
+                    throw new Error(
+                        `Unsupported token type ${this._currentChar}`
+                    );
                 }
             }
         }
