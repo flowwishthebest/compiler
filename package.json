@@ -10,10 +10,9 @@
     "test": "jest -c ./jest.config.json",
     "coverage": "cat ./coverage/lcov.info | coveralls",
     "build": "tsc",
-    "lint": "tslint -p ./tsconfig.json -c ./tslint.json",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx ./src",
     "lint:fix": "tslint --fix -p ./tsconfig.json -c ./tslint.json",
     "prettify": "prettier --config ./prettierrc.json --write '{src,__tests__}/**/*.ts'",
-    "lerna": "lerna",
     "start": "node dist/main.js",
     "debug": "node --inspect-brk=0.0.0.0 dist/main.js"
   },
@@ -27,15 +26,16 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "24.0.19",
-    "@types/node": "^13.7.1",
+    "@types/node": "13.7.1",
+    "@typescript-eslint/eslint-plugin": "2.19.2",
+    "@typescript-eslint/parser": "2.19.2",
     "coveralls": "3.0.7",
+    "eslint": "6.8.0",
+    "eslint-plugin-jest": "^23.7.0",
     "jest": "24.9.0",
     "prettier": "1.18.2",
     "ts-jest": "24.1.0",
-    "tslint": "5.20.0",
     "typescript": "3.6.4"
   },
-  "dependencies": {
-    "lerna": "^3.20.1"
-  }
+  "dependencies": {}
 }

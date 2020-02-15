@@ -9,11 +9,10 @@
  * });
  */
 
-import { Parser } from '../packages/parser';
-import { Tokenizer } from '../packages/tokenizer';
+import { Parser } from '../src/parser';
+import { Tokenizer } from '../src/tokenizer';
 
 describe('Parser tests', () => {
-
     test('Add op', () => {
         const parser = new Parser(new Tokenizer('1 + 2'));
 
@@ -67,5 +66,4 @@ describe('Parser tests', () => {
 
         expect(result).toEqual(42);
     });
-
 });
