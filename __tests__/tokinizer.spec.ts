@@ -143,4 +143,35 @@ describe('Tokenizer tests', () => {
         token = tokenizer.getNextToken();
         expect(token.getType()).toEqual('EOF');
     });
+
+    test('Can handle multiple factors', () => {
+        const tokenizer = new Tokenizer('  (  123   -     324  )  * 435   ');
+
+        let token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('LPAREN');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('NUMBER');
+        expect(token.getValue()).toEqual(123)
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('MINUS');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('NUMBER');
+        expect(token.getValue()).toEqual(324);
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('RPAREN')
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('MUL');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('NUMBER');
+        expect(token.getValue()).toEqual(435);
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('EOF');
+    });
 });
