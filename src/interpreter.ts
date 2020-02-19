@@ -1,12 +1,7 @@
-import { PlusToken } from "./tokens/plus.token";
-import { MulToken } from "./tokens/mul.token";
 import { Parser } from "./parser";
-import { MinusToken } from "./tokens/minus.token";
-import { DivToken } from "./tokens/div.token";
+import { DivToken, MinusToken, MulToken, PlusToken } from "./tokens";
 import { ASTVisitor } from "./ast-visitor";
-import { BinOpAST } from "./ast/bin-op.ast";
-import { NumberAST } from "./ast/number.ast";
-import { UnaryOpAST } from "./ast/unary-op.ast";
+import { UnaryOpAST, NumberAST, BinOpAST } from "./ast";
 
 export class Interpreter extends ASTVisitor {
     constructor(private readonly _parser: Parser) {
