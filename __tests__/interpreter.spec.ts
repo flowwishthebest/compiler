@@ -1,25 +1,15 @@
-/**
- * test(description, function testFunction() {
- *  // arrange
- *
- *  // act
- *
- *  // assert
- *
- * });
- */
-
 import { Parser } from '../src/parser';
 import { Tokenizer } from '../src/tokenizer';
 import { Interpreter } from '../src/interpreter';
 
-describe('Parser tests', () => {
+describe('Interpreter tests', () => {
     test('Add op', () => {
         const parser = new Parser(new Tokenizer('1 + 2'));
         const interpreter = new Interpreter(parser);
 
         const result = interpreter.interpret();
 
+        expect(typeof result).toBe('number');
         expect(result).toEqual(3);
     });
 
@@ -29,6 +19,7 @@ describe('Parser tests', () => {
 
         const result = interpreter.interpret();
 
+        expect(typeof result).toBe('number');
         expect(result).toEqual(-1);
     });
 
@@ -53,6 +44,7 @@ describe('Parser tests', () => {
 
         const result = interpreter.interpret();
 
+        expect(typeof result).toBe('number');
         expect(result).toEqual(10);
     });
 
@@ -62,6 +54,7 @@ describe('Parser tests', () => {
 
         const result = interpreter.interpret();
 
+        expect(typeof result).toBe('number');
         expect(result).toEqual(11);
     });
 
@@ -71,6 +64,7 @@ describe('Parser tests', () => {
 
         const result = interpreter.interpret();
 
+        expect(typeof result).toBe('number');
         expect(result).toEqual(42);
     });
 
@@ -79,7 +73,18 @@ describe('Parser tests', () => {
         const interpreter = new Interpreter(parser);
 
         const result = interpreter.interpret();
+        
+        expect(typeof result).toBe('number');
+        expect(result).toBe(61);
+    });
 
-        expect(result).toEqual(61);
+    test('Unary operators', () => {
+        const parser = new Parser(new Tokenizer('(1+2)*-10'));
+        const interpreter = new Interpreter(parser);
+
+        const result = interpreter.interpret();
+
+        expect(typeof result).toBe('number');
+        expect(result).toBe(-30);
     });
 });

@@ -4,7 +4,9 @@ import { Parser } from "./parser";
 import { MinusToken } from "./tokens/minus.token";
 import { DivToken } from "./tokens/div.token";
 import { ASTVisitor } from "./ast-visitor";
-import { BinOpAST, NumberAST } from "./ast";
+import { BinOpAST } from "./ast/bin-op.ast";
+import { NumberAST } from "./ast/number.ast";
+import { UnaryOpAST } from "./ast/unary-op.ast";
 
 export class Interpreter extends ASTVisitor {
     constructor(private readonly _parser: Parser) {
@@ -16,9 +18,7 @@ export class Interpreter extends ASTVisitor {
     }
 
     public visitBinOpAST(node: BinOpAST): number {
-        const operation = node.getToken().constructor;
-
-        switch (operation) {
+        switch (node.getToken().constructor) {
             case PlusToken: {
                 return this.visit(node.getLeft()) + this.visit(node.getRight());
             }
@@ -32,12 +32,25 @@ export class Interpreter extends ASTVisitor {
                 return this.visit(node.getLeft()) / this.visit(node.getRight());
             }
             default: {
-                throw new Error('Unknown operation name' + operation);
+                throw new Error(
+                    `Unknown op name ${node.getToken().constructor.name}`,
+                );
             }
         }
     }
 
     public visitNumberAST(node: NumberAST): number {
         return node.getToken().getValue();
+    }
+
+    public visitUnaryOpAST(node: UnaryOpAST): number {
+        switch (node.getToken().constructor) {
+            case PlusToken: {
+                return +this.visit(node.getExpr());
+            }
+            case MinusToken: {
+                return -this.visit(node.getExpr());
+            }
+        }
     }
 }
