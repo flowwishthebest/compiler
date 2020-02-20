@@ -1,5 +1,5 @@
 import { Parser } from "./parser";
-import { DivToken, MinusToken, MulToken, PlusToken } from "./tokens";
+import { FloatDivToken, MinusToken, MulToken, PlusToken } from "./tokens";
 import { ASTVisitor } from "./ast-visitor";
 import { UnaryOpAST, NumberAST, BinOpAST, EmptyAST, CompoundAST, AssignAST, VariableAST } from "./ast";
 
@@ -25,7 +25,7 @@ export class Interpreter extends ASTVisitor {
             case MulToken: {
                 return this.visit(node.getLeft()) * this.visit(node.getRight());
             }
-            case DivToken: {
+            case FloatDivToken: {
                 return this.visit(node.getLeft()) / this.visit(node.getRight());
             }
             default: {

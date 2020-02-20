@@ -1,10 +1,9 @@
 import { Tokenizer } from './tokenizer';
-import { DivToken } from './tokens/div.token';
+import { FloatDivToken } from './tokens/float-div.token';
 import { MinusToken } from './tokens/minus.token';
 import { MulToken } from './tokens/mul.token';
 import { PlusToken } from './tokens/plus.token';
 import { Token } from './tokens/token';
-import { NumberToken } from './tokens/number.token';
 import { LParenToken } from './tokens/lparen.token';
 import { VariableAST } from './ast/var.ast';
 import { UnaryOpAST } from './ast/unary-op.ast';
@@ -18,6 +17,8 @@ import { CompoundAST } from './ast/compound.ast';
 import { BinOpAST} from './ast/bin-op.ast';
 import { NumberAST } from './ast/number.ast';
 import { AST } from './ast/ast';
+import { IntegerConstToken } from './tokens/integer-const.token';
+import { FloatConstToken } from './tokens/float-const.token';
 
 export class Parser {
     // @Parser = [token, ..., token] -> ast
@@ -74,7 +75,7 @@ export class Parser {
             return new UnaryOpAST(token, this._factor());
         }
 
-        if (token instanceof NumberToken) {
+        if (token instanceof IntegerConstToken || token instanceof FloatConstToken) {
             this._setNext();
             return new NumberAST(token);
         }
@@ -94,12 +95,12 @@ export class Parser {
         let node = this._factor();
 
         while (
-            this._currentToken instanceof DivToken ||
+            this._currentToken instanceof FloatDivToken ||
             this._currentToken instanceof MulToken
         ) {
             const token = this._currentToken;
 
-            if (token instanceof DivToken) {
+            if (token instanceof FloatDivToken) {
                 this._setNext();
             } else if (token instanceof MulToken) {
                 this._setNext();

@@ -5,7 +5,7 @@ import {
     MinusToken,
     LParenToken,
     EOFToken,
-    DivToken,
+    FloatDivToken,
 } from './tokens';
 import { Token } from './tokens/token';
 import { RBracketToken } from './tokens/rbracket.token';
@@ -26,7 +26,9 @@ function isDigit(char: string): boolean {
 }
 
 function isWhiteSpace(char: string): boolean {
-    return char === ' ';
+    // 10 -- new line, 32 -- space
+    const code = char.charCodeAt(0);
+    return code === 32 || code === 10;
 }
 
 function isAlphaNum(char: string): boolean {
@@ -116,7 +118,7 @@ export class Tokenizer {
                 }
                 case FLOAT_DIV_SIGN: {
                     this._toNextChar();
-                    return new DivToken();
+                    return new FloatDivToken();
                 }
                 case LPAREN_SIGN: {
                     this._toNextChar();
@@ -140,7 +142,7 @@ export class Tokenizer {
                 }
                 default: {
                     throw new Error(
-                        `Unsupported token type ${this._currentChar}`
+                        `Unsupported token type: ${this._currentChar}`
                     );
                 }
             }
@@ -187,7 +189,7 @@ export class Tokenizer {
 
         const id = identifier.join('');
 
-        return this.RESERVED_KEYWORDS[id] || new IdToken(id);
+        return this.RESERVED_KEYWORDS.get(id) || new IdToken(id);
     }
 
     private _toNextChar(): void {

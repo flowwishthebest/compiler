@@ -5,7 +5,7 @@ export enum ETokenType {
     PLUS = 'PLUS',
     MINUS = 'MINUS',
     MUL = 'MUL',
-    DIV = 'DIV',
+    FLOAT_DIV = 'FLOAT_DIV',
     LPAREN = 'LPAREN',
     RPAREN = 'RPAREN',
     RBRACKET = 'RBRACKET',
