@@ -1,7 +1,6 @@
 import {
     PlusToken,
     RParenToken,
-    NumberToken,
     MulToken,
     MinusToken,
     LParenToken,
@@ -14,6 +13,13 @@ import { LBracketToken } from './tokens/lbracket.token';
 import { IdToken } from './tokens/id.token';
 import { AssignToken } from './tokens/assign.token';
 import { SemicolonToken } from './tokens/semicolon.token';
+import { IntegerTypeToken } from './tokens/integer-type.token';
+import { FloatTypeToken } from './tokens/float-type.token';
+import { IntegerDivToken } from './tokens/integer-div.token';
+import { IntegerConstToken } from './tokens/integer-const.token';
+import { FloatConstToken } from './tokens/float-const.token';
+import { ColonToken } from './tokens/colon.token';
+import { CommaToken } from './tokens/comma.token';
 
 function isDigit(char: string): boolean {
     return '0' <= char && char <= '9';
@@ -28,7 +34,7 @@ function isAlphaNum(char: string): boolean {
 }
 
 const PLUS_SIGN = '+';
-const DIV_SIGN = '/';
+const FLOAT_DIV_SIGN = '/';
 const MINUS_SIGN = '-';
 const MUL_SIGN = '*';
 const LPAREN_SIGN = '(';
@@ -36,24 +42,44 @@ const RPAREN_SIGN = ')';
 const LBRACKET_SIGN = '{';
 const RBRACKET_SIGN = '}';
 const SEMICOLON_SIGN = ';';
+const DOT_SIGN = '.';
+const COLON_SIGN = ':';
+const COMMA_SIGN = ',';
 
 // @lexer = Source code to [token, ..., token]
 export class Tokenizer {
+    private readonly RESERVED_KEYWORDS: Map<string, Token>;
+
     private _position = 0;
     private _currentChar: string;
 
     constructor(private readonly _sourceCode: string) {
         this._currentChar = this._sourceCode.charAt(this._position);
+
+        this.RESERVED_KEYWORDS = new Map<string, Token>();
+        this.RESERVED_KEYWORDS
+            .set('integer', new IntegerTypeToken())
+            .set('float', new FloatTypeToken())
+            .set('div', new IntegerDivToken());
     }
 
     public getNextToken(): Token {
         while (this._currentChar) {
+
             if (isWhiteSpace(this._currentChar)) {
                 this._toNextChar();
                 continue;
             }
 
+            if (this._currentChar === '/' && this._peek() === '/') {
+                this._toNextChar();
+                this._toNextChar();
+                this._skipComments();
+                continue;
+            }
+
             if (isDigit(this._currentChar)) {
+                // TODO: 123 || .123 eq 0.123
                 return this._number();
             }
 
@@ -68,6 +94,14 @@ export class Tokenizer {
             }
 
             switch (this._currentChar) {
+                case COLON_SIGN: {
+                    this._toNextChar();
+                    return new ColonToken();
+                }
+                case COMMA_SIGN: {
+                    this._toNextChar();
+                    return new CommaToken();
+                }
                 case PLUS_SIGN: {
                     this._toNextChar();
                     return new PlusToken();
@@ -80,7 +114,7 @@ export class Tokenizer {
                     this._toNextChar();
                     return new MulToken();
                 }
-                case DIV_SIGN: {
+                case FLOAT_DIV_SIGN: {
                     this._toNextChar();
                     return new DivToken();
                 }
@@ -115,17 +149,32 @@ export class Tokenizer {
         return new EOFToken();
     }
 
-    private _number(): NumberToken {
-        const interger = [];
+    private _number(): IntegerConstToken | FloatConstToken {
+        const num = [];
 
         while (this._currentChar && isDigit(this._currentChar)) {
-            interger.push(this._currentChar);
+            num.push(this._currentChar);
             this._toNextChar();
         }
 
-        const i = parseFloat(interger.join(''));
+        if (this._currentChar === DOT_SIGN) {
+            num.push(DOT_SIGN);
 
-        return new NumberToken(i);
+            this._toNextChar();
+
+            while(this._currentChar && isDigit(this._currentChar)) {
+                num.push(this._currentChar);
+                this._toNextChar();
+            }
+
+            const f = parseFloat(num.join(''));
+
+            return new FloatConstToken(f);
+        }
+
+        const i = parseInt(num.join(''));
+
+        return new IntegerConstToken(i);
     }
 
     private _identifier(): IdToken {
@@ -136,9 +185,9 @@ export class Tokenizer {
             this._toNextChar();
         }
 
-        const i = identifier.join('');
+        const id = identifier.join('');
 
-        return new IdToken(i);
+        return this.RESERVED_KEYWORDS[id] || new IdToken(id);
     }
 
     private _toNextChar(): void {
@@ -148,5 +197,12 @@ export class Tokenizer {
     
     private _peek(): string {
         return this._sourceCode.charAt(this._position + 1);
+    }
+
+    private _skipComments(): void {
+        while(this._currentChar && this._currentChar !== '\n') {
+            this._toNextChar();
+        }
+        this._toNextChar(); // skip new line
     }
 }

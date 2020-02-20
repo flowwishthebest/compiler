@@ -1,6 +1,7 @@
 export enum ETokenType {
     EOF = 'EOF',
-    NUMBER = 'NUMBER',
+    INTEGER_CONST = 'INTEGER_CONST',
+    FLOAT_CONST = 'FLOAT_CONST',
     PLUS = 'PLUS',
     MINUS = 'MINUS',
     MUL = 'MUL',
@@ -12,4 +13,9 @@ export enum ETokenType {
     ID = 'ID',
     ASSIGN = 'ASSIGN',
     SEMICOLON = 'SEMICOLON',
+    INTEGER = 'INTEGER',
+    FLOAT = 'FLOAT',
+    INTEGER_DIV = 'INTEGER_DIV',
+    COLON = 'COLON',
+    COMMA = 'COMMA',
 }

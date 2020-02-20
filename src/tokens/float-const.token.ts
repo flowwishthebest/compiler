@@ -1,8 +1,8 @@
 import { ETokenType } from '../types/token.type';
 import { Token } from './token';
 
-export class NumberToken extends Token<number> {
+export class FloatConstToken extends Token<number> {
     constructor(value: number) {
-        super(ETokenType.NUMBER, value);
+        super(ETokenType.FLOAT_CONST, value);
     }
 }
