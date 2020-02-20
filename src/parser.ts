@@ -1,23 +1,32 @@
 import { Tokenizer } from './tokenizer';
-import { DivToken } from './tokens/div.token';
+import { FloatDivToken } from './tokens/float-div.token';
 import { MinusToken } from './tokens/minus.token';
 import { MulToken } from './tokens/mul.token';
 import { PlusToken } from './tokens/plus.token';
 import { Token } from './tokens/token';
-import { NumberToken } from './tokens/number.token';
 import { LParenToken } from './tokens/lparen.token';
 import { VariableAST } from './ast/var.ast';
 import { UnaryOpAST } from './ast/unary-op.ast';
 import { LBracketToken } from './tokens/lbracket.token';
 import { IdToken } from './tokens/id.token';
 import { SemicolonToken } from './tokens/semicolon.token';
-import { EOFToken } from './tokens';
+import { ColonToken, IntegerTypeToken } from './tokens';
 import { AssignAST } from './ast/assign.ast';
 import { EmptyAST } from './ast/empty.ast';
 import { CompoundAST } from './ast/compound.ast';
 import { BinOpAST} from './ast/bin-op.ast';
 import { NumberAST } from './ast/number.ast';
 import { AST } from './ast/ast';
+import { IntegerConstToken } from './tokens/integer-const.token';
+import { FloatConstToken } from './tokens/float-const.token';
+import { BlockAST } from './ast/block.ast';
+import { VariableDeclarationAST } from './ast/variable-declaration.ast';
+import { VarToken } from './tokens/var.token';
+import { CommaToken } from './tokens/comma.token';
+import { TypeAST } from './ast/type.ast';
+import { FloatTypeToken } from './tokens/float-type.token';
+import { ProgramAST } from './ast/program.ast';
+import { IntegerDivToken } from './tokens/integer-div.token';
 
 export class Parser {
     // @Parser = [token, ..., token] -> ast
@@ -29,9 +38,9 @@ export class Parser {
     public parse(): AST {
         const ast = this._programm();
 
-        if (this._currentToken.constructor !== EOFToken) {
-            throw new SyntaxError('parse error');
-        }
+        // if (this._currentToken.constructor !== EOFToken) {
+        //     throw new SyntaxError('parse error');
+        // }
 
         return ast;
     }
@@ -61,7 +70,8 @@ export class Parser {
         return node;
     }
 
-    private _factor(): AST { // factor : (PLUS | MINUS) factor | INTEGER | LPAREN expr RPAREN
+    private _factor(): AST {
+        // factor : PLUS factor | MINUS factor | INTEGER_CONST | REAL_CONST | LPAREN expr RPAREN | variable
         const token = this._currentToken;
 
         if (token instanceof PlusToken) {
@@ -74,7 +84,7 @@ export class Parser {
             return new UnaryOpAST(token, this._factor());
         }
 
-        if (token instanceof NumberToken) {
+        if (token instanceof IntegerConstToken || token instanceof FloatConstToken) {
             this._setNext();
             return new NumberAST(token);
         }
@@ -89,19 +99,23 @@ export class Parser {
         return this._variable();
     }
 
-    private _term(): AST { // factor ((MUL | DIV) factor)*
+    private _term(): AST {
+        // term : factor ((MUL | INTEGER_DIV | FLOAT_DIV) factor)*
 
         let node = this._factor();
 
         while (
-            this._currentToken instanceof DivToken ||
-            this._currentToken instanceof MulToken
+            this._currentToken instanceof FloatDivToken ||
+            this._currentToken instanceof MulToken ||
+            this._currentToken instanceof IntegerDivToken
         ) {
             const token = this._currentToken;
 
-            if (token instanceof DivToken) {
+            if (token instanceof FloatDivToken) {
                 this._setNext();
             } else if (token instanceof MulToken) {
+                this._setNext();
+            } else if (token instanceof IntegerDivToken) {
                 this._setNext();
             }
 
@@ -111,8 +125,20 @@ export class Parser {
         return node;
     }
 
-    private _programm(): CompoundAST { // program : compound_statement DOT
-        return this._compoundStatement();
+    private _programm(): ProgramAST {
+        // program : compound_statement DOT
+        this._setNext(); // setup token
+        this._setNext(); // remove programm kw
+        const varNode = this._variable();
+        const progName = varNode.getToken().getValue();
+
+        this._setNext(); // remove ;
+
+        const block = this._block();
+
+        const progNode = new ProgramAST(progName, block);
+
+        return progNode;
     }
 
     private _compoundStatement(): CompoundAST {
@@ -184,6 +210,79 @@ export class Parser {
 
     private _empty(): EmptyAST {
         return new EmptyAST();
+    }
+
+    private _block(): BlockAST {
+        // block : declarations compound_statement
+
+        const declarations = this._declarations();
+        const compoundStatement = this._compoundStatement();
+        return new BlockAST(declarations, compoundStatement);
+    }
+
+    private _declarations(): Array<VariableDeclarationAST> {
+        // declarations : VAR (variable_declaration SEMI)+ | empty
+        const declarations = [];
+        if (this._currentToken instanceof VarToken) {
+            this._setNext();
+
+            while (this._currentToken instanceof IdToken) {
+                const variableDeclaration = this._variableDeclaration();
+                declarations.push(...variableDeclaration);
+                this._setNext(); // remove ;
+            }
+        }
+        return declarations;
+    }
+
+    private _variableDeclaration(): Array<VariableDeclarationAST> {
+        // variable_declaration : ID (COMMA ID)* COLON type_spec
+
+        const varibleNode = [new VariableAST(this._currentToken)];
+        this._setNext();
+        while (this._currentToken instanceof CommaToken) {
+            this._setNext();
+            varibleNode.push(new VariableAST(this._currentToken));
+            this._setNext();
+        }
+        
+        if (this._currentToken instanceof ColonToken) {
+            this._setNext(); // remove colon
+        } else {
+            throw new Error('Expected colon after var declaration');
+        }
+        
+        const typeNode = this._typeSpec();
+        const variableDeclarations = [];
+
+        for (let i = 0; i < varibleNode.length; i++) {
+            variableDeclarations.push(
+                new VariableDeclarationAST(varibleNode[i], typeNode),
+            );
+        }
+
+        return variableDeclarations;
+    }
+
+    private _typeSpec(): TypeAST {
+        // type_spec : integer | real
+
+        const token = this._currentToken;
+        switch (token.constructor) {
+            case IntegerTypeToken: {
+                this._setNext();
+                break;
+            }
+            case FloatTypeToken: {
+                this._setNext();
+                break;
+            }
+            default: {
+                throw new Error('Unsupported type ' + token.constructor.name);
+            }
+        }
+
+        return new TypeAST(token);
     }
 
     private _setNext(): void {

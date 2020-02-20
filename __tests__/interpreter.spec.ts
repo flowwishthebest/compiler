@@ -2,7 +2,7 @@ import { Parser } from '../src/parser';
 import { Tokenizer } from '../src/tokenizer';
 import { Interpreter } from '../src/interpreter';
 
-describe('Interpreter tests', () => {
+describe.skip('Interpreter tests', () => {
     test('Add op', () => {
         const parser = new Parser(new Tokenizer('1 + 2'));
         const interpreter = new Interpreter(parser);
