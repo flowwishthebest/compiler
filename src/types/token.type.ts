@@ -18,4 +18,6 @@ export enum ETokenType {
     INTEGER_DIV = 'INTEGER_DIV',
     COLON = 'COLON',
     COMMA = 'COMMA',
+    PROGRAM = 'PROGRAM',
+    VAR = 'VAR',
 }

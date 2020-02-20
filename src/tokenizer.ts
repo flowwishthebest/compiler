@@ -20,6 +20,8 @@ import { IntegerConstToken } from './tokens/integer-const.token';
 import { FloatConstToken } from './tokens/float-const.token';
 import { ColonToken } from './tokens/colon.token';
 import { CommaToken } from './tokens/comma.token';
+import { VarToken } from './tokens/var.token';
+import { ProgramToken } from './tokens/program.token';
 
 function isDigit(char: string): boolean {
     return '0' <= char && char <= '9';
@@ -62,7 +64,9 @@ export class Tokenizer {
         this.RESERVED_KEYWORDS
             .set('integer', new IntegerTypeToken())
             .set('float', new FloatTypeToken())
-            .set('div', new IntegerDivToken());
+            .set('div', new IntegerDivToken())
+            .set('var', new VarToken())
+            .set('program', new ProgramToken());
     }
 
     public getNextToken(): Token {

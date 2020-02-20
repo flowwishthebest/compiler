@@ -2,9 +2,14 @@ import { Parser } from "./parser";
 import { FloatDivToken, MinusToken, MulToken, PlusToken } from "./tokens";
 import { ASTVisitor } from "./ast-visitor";
 import { UnaryOpAST, NumberAST, BinOpAST, EmptyAST, CompoundAST, AssignAST, VariableAST } from "./ast";
+import { ProgramAST } from "./ast/program.ast";
+import { BlockAST } from "./ast/block.ast";
+import { VariableDeclarationAST } from "./ast/variable-declaration.ast";
+import { TypeAST } from "./ast/type.ast";
+import { IntegerDivToken } from "./tokens/integer-div.token";
 
 export class Interpreter extends ASTVisitor {
-    private readonly GLOABAL_SCOPE: Record<string, any> = Object.create(null);
+    public readonly GLOABAL_SCOPE: Record<string, any> = Object.create(null);
 
     constructor(private readonly _parser: Parser) {
         super();
@@ -27,6 +32,10 @@ export class Interpreter extends ASTVisitor {
             }
             case FloatDivToken: {
                 return this.visit(node.getLeft()) / this.visit(node.getRight());
+            }
+            case IntegerDivToken: {
+                const result = this.visit(node.getLeft()) / this.visit(node.getRight());
+                return Math.trunc(result);
             }
             default: {
                 throw new Error(
@@ -72,6 +81,25 @@ export class Interpreter extends ASTVisitor {
     }
 
     public visitEmptyAST(node: EmptyAST): void {
+        return;
+    }
+
+    public visitProgramAST(node: ProgramAST): void {
+        this.visit(node.getBlock());
+    }
+
+    public visitBlockAST(node: BlockAST): void {
+        node.getDeclarations().forEach((d) => this.visit(d));
+        this.visit(node.getCompoundStatement());
+    }
+
+    public visitVariableDeclarationAST(node: VariableDeclarationAST): void {
+        // TODO:
+        return;
+    }
+    
+    public visitTypeAST(node: TypeAST): void {
+        // TODO:
         return;
     }
 }
