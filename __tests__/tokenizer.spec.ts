@@ -152,7 +152,7 @@ describe('Tokenizer tests', () => {
 
         token = tokenizer.getNextToken();
         expect(token.getType()).toEqual('NUMBER');
-        expect(token.getValue()).toEqual(123)
+        expect(token.getValue()).toEqual(123);
 
         token = tokenizer.getNextToken();
         expect(token.getType()).toEqual('MINUS');
@@ -162,7 +162,7 @@ describe('Tokenizer tests', () => {
         expect(token.getValue()).toEqual(324);
 
         token = tokenizer.getNextToken();
-        expect(token.getType()).toEqual('RPAREN')
+        expect(token.getType()).toEqual('RPAREN');
 
         token = tokenizer.getNextToken();
         expect(token.getType()).toEqual('MUL');
@@ -170,6 +170,76 @@ describe('Tokenizer tests', () => {
         token = tokenizer.getNextToken();
         expect(token.getType()).toEqual('NUMBER');
         expect(token.getValue()).toEqual(435);
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('EOF');
+    });
+
+    test('Can recognize brackets', () => {
+        const tokenizer = new Tokenizer('{}');
+
+        let token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('LBRACKET');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('RBRACKET');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('EOF');
+    });
+
+    test('Can recognize assign', () => {
+        const tokenizer = new Tokenizer('{:=}');
+
+        let token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('LBRACKET');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('ASSIGN');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('RBRACKET');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('EOF');
+    });
+
+    test('Can recognize hard expr', () => {
+        const tokenizer = new Tokenizer('{ age := 18;count:=42; }');
+
+        let token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('LBRACKET');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('ID');
+        expect(token.getValue()).toBe('age');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('ASSIGN');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toBe('NUMBER');
+        expect(token.getValue()).toBe(18);
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('SEMICOLON');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toBe('ID');
+        expect(token.getValue()).toBe('count');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toBe('ASSIGN');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toBe('NUMBER');
+        expect(token.getValue()).toBe(42);
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('SEMICOLON');
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toEqual('RBRACKET');
 
         token = tokenizer.getNextToken();
         expect(token.getType()).toEqual('EOF');

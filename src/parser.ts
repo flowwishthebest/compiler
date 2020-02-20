@@ -6,10 +6,18 @@ import { PlusToken } from './tokens/plus.token';
 import { Token } from './tokens/token';
 import { NumberToken } from './tokens/number.token';
 import { LParenToken } from './tokens/lparen.token';
-import { AST } from './ast/ast';
-import { BinOpAST } from './ast/bin-op.ast';
-import { NumberAST } from './ast/number.ast';
+import { VariableAST } from './ast/var.ast';
 import { UnaryOpAST } from './ast/unary-op.ast';
+import { LBracketToken } from './tokens/lbracket.token';
+import { IdToken } from './tokens/id.token';
+import { SemicolonToken } from './tokens/semicolon.token';
+import { EOFToken } from './tokens';
+import { AssignAST } from './ast/assign.ast';
+import { EmptyAST } from './ast/empty.ast';
+import { CompoundAST } from './ast/compound.ast';
+import { BinOpAST} from './ast/bin-op.ast';
+import { NumberAST } from './ast/number.ast';
+import { AST } from './ast/ast';
 
 export class Parser {
     // @Parser = [token, ..., token] -> ast
@@ -19,7 +27,13 @@ export class Parser {
     constructor(private readonly _tokenizer: Tokenizer) {}
 
     public parse(): AST {
-        return this._expr();
+        const ast = this._programm();
+
+        if (this._currentToken.constructor !== EOFToken) {
+            throw new SyntaxError('parse error');
+        }
+
+        return ast;
     }
 
     private _expr(): AST { // term ((PLUS | MINUS) term)*
@@ -72,9 +86,7 @@ export class Parser {
             return ast;
         }
 
-        throw new Error(
-            `Syntax error. Factor method got execp token ${this._currentToken}`,
-        );
+        return this._variable();
     }
 
     private _term(): AST { // factor ((MUL | DIV) factor)*
@@ -97,6 +109,81 @@ export class Parser {
         }
 
         return node;
+    }
+
+    private _programm(): CompoundAST { // program : compound_statement DOT
+        return this._compoundStatement();
+    }
+
+    private _compoundStatement(): CompoundAST {
+        // compound_statement: BEGIN statement_list END
+        this._setNext(); // remove {
+        const nodes = this._statementList();
+        this._setNext(); // remove }
+
+        const comp = new CompoundAST();
+
+        for (let i = 0; i < nodes.length; i++) {
+            comp.getChildren().push(nodes[i]);
+        }
+
+        return comp;
+    }
+
+    private _statementList(): Array<CompoundAST | AssignAST | EmptyAST> {
+        // statement_list : statement | statement SEMI statement_list
+
+        const node = this._statement();
+
+        const results = [node];
+
+        while (this._currentToken.constructor === SemicolonToken) {
+            this._setNext();
+            results.push(this._statement());
+        }
+
+        if (this._currentToken.constructor === IdToken) {
+            throw new SyntaxError('Error statement list');
+        }
+
+        return results;
+    }
+
+    private _statement(): CompoundAST | AssignAST | EmptyAST {
+        // statement : compound_statement | assignment_statement | empty
+
+        switch (this._currentToken.constructor) {
+            case LBracketToken: {
+                return this._compoundStatement();
+            }
+            case IdToken: {
+                return this._assignmentStatement();
+            }
+            default: {
+                return this._empty();
+            }
+        }
+    }
+
+    private _assignmentStatement(): AssignAST {
+        // assignment_statement : variable ASSIGN expr
+
+        const left = this._variable();
+        const op = this._currentToken;
+        this._setNext();
+        const right = this._expr();
+
+        return new AssignAST(left, op, right);
+    }
+
+    private _variable(): VariableAST {
+        const node = new VariableAST(this._currentToken);
+        this._setNext();
+        return node;
+    }
+
+    private _empty(): EmptyAST {
+        return new EmptyAST();
     }
 
     private _setNext(): void {

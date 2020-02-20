@@ -1,14 +1,11 @@
-import { PlusToken } from "./tokens/plus.token";
-import { MulToken } from "./tokens/mul.token";
 import { Parser } from "./parser";
-import { MinusToken } from "./tokens/minus.token";
-import { DivToken } from "./tokens/div.token";
+import { DivToken, MinusToken, MulToken, PlusToken } from "./tokens";
 import { ASTVisitor } from "./ast-visitor";
-import { BinOpAST } from "./ast/bin-op.ast";
-import { NumberAST } from "./ast/number.ast";
-import { UnaryOpAST } from "./ast/unary-op.ast";
+import { UnaryOpAST, NumberAST, BinOpAST, EmptyAST, CompoundAST, AssignAST, VariableAST } from "./ast";
 
 export class Interpreter extends ASTVisitor {
+    private readonly GLOABAL_SCOPE: Record<string, any> = Object.create(null);
+
     constructor(private readonly _parser: Parser) {
         super();
     }
@@ -52,5 +49,29 @@ export class Interpreter extends ASTVisitor {
                 return -this.visit(node.getExpr());
             }
         }
+    }
+
+    public visitAssignAST(node: AssignAST): void {
+        const variableName = node.getLeft().getToken().getValue();
+        this.GLOABAL_SCOPE[variableName] = this.visit(node.getRight());
+    }
+
+    public visitVariableAST(node: VariableAST): number {
+        const variableName = node.getToken().getValue();
+        const value = this.GLOABAL_SCOPE[variableName];
+
+        if (!value) {
+            throw new Error('Name error: ' + value);
+        }
+
+        return value;
+    }
+
+    public visitCompoundAST(node: CompoundAST): void {
+        node.getChildren().forEach((c) => this.visit(c));
+    }
+
+    public visitEmptyAST(node: EmptyAST): void {
+        return;
     }
 }

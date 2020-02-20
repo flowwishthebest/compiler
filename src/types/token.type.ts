@@ -7,4 +7,9 @@ export enum ETokenType {
     DIV = 'DIV',
     LPAREN = 'LPAREN',
     RPAREN = 'RPAREN',
+    RBRACKET = 'RBRACKET',
+    LBRACKET = 'LBRACKET',
+    ID = 'ID',
+    ASSIGN = 'ASSIGN',
+    SEMICOLON = 'SEMICOLON',
 }
