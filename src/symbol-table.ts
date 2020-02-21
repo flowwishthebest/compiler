@@ -13,15 +13,10 @@ export class SymbolTable {
     public print(): void {
         for (const sym of this._symbols.values()) {
             const name = sym.getName();
-            const type = sym.getType();
-
-            let typeName = null;
-            if (type) {
-                typeName = type.getName();
-            }
+            const type = sym.getType() && sym.getType().getName();
 
             const constName = sym.constructor.name;
-            console.log(`${constName}(${name}` + (typeName ? (', ' + typeName + ')') : ')'));
+            console.log(`${constName}(${name}` + (type ? (`, ${type})`) : ')'));
         }
     }
 
