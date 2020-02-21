@@ -2,12 +2,12 @@ import { ASTVisitor } from "./ast-visitor"
 import { SymbolTable } from "./symbol-table"
 import { BlockAST } from "./ast/block.ast";
 import { ProgramAST } from "./ast/program.ast";
-import { BinOpAST, NumberAST, UnaryOpAST, CompoundAST, EmptyAST } from "./ast";
+import { BinOpAST, NumberAST, UnaryOpAST, CompoundAST, EmptyAST, AssignAST, VariableAST } from "./ast";
 import { VariableDeclarationAST } from "./ast/variable-declaration.ast";
 import { VariableSymbol } from "./symbols";
 
 export class SymbolTableBuilder extends ASTVisitor {
-    private readonly _symbolTable: SymbolTable;
+    public readonly _symbolTable: SymbolTable;
 
     constructor() {
         super();
@@ -51,5 +51,25 @@ export class SymbolTableBuilder extends ASTVisitor {
         const typeSymbol = this._symbolTable.lookup(typeName);
         const varName = node.getVariable().getToken().getValue();
         this._symbolTable.define(new VariableSymbol(varName, typeSymbol));
+    }
+
+    public visitAssignAST(node: AssignAST): void | never {
+        const varName = node.getLeft().getToken().getValue();
+        const varSymbol = this._symbolTable.lookup(varName);
+
+        if (!varSymbol) {
+            throw new Error('Name error: ' + varName);
+        }
+    
+        this.visit(node.getRight());
+    }
+
+    public visitVariableAST(node: VariableAST): void {
+        const varName = node.getToken().getValue();
+        const varSymbol = this._symbolTable.lookup(varName);
+    
+        if (!varSymbol) {
+            throw new Error('Name error: ' + varName); 
+        }
     }
 }
