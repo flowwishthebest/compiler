@@ -1,22 +1,29 @@
 import { Parser } from "./parser";
 import { FloatDivToken, MinusToken, MulToken, PlusToken } from "./tokens";
 import { ASTVisitor } from "./ast-visitor";
-import { UnaryOpAST, NumberAST, BinOpAST, EmptyAST, CompoundAST, AssignAST, VariableAST } from "./ast";
+import { UnaryOpAST, NumberAST, BinOpAST, EmptyAST, CompoundAST, AssignAST, VariableAST, AST } from "./ast";
 import { ProgramAST } from "./ast/program.ast";
 import { BlockAST } from "./ast/block.ast";
 import { VariableDeclarationAST } from "./ast/variable-declaration.ast";
 import { TypeAST } from "./ast/type.ast";
 import { IntegerDivToken } from "./tokens/integer-div.token";
+import { ProcedureDeclarationAST } from "./ast/procedure-declaration.ast";
 
 export class Interpreter extends ASTVisitor {
-    public readonly GLOABAL_SCOPE: Record<string, any> = Object.create(null);
+    private readonly GLOABAL_SCOPE: Map<string, any>;
 
-    constructor(private readonly _parser: Parser) {
+    constructor(private readonly _tree: AST) {
         super();
+
+        this.GLOABAL_SCOPE = new Map();
     }
 
-    public interpret(): number {
-        return this.visit(this._parser.parse());
+    public interpret(): void {
+        return this.visit(this._tree);
+    }
+
+    public getGlobalScope(): Map<string, any> {
+        return this.GLOABAL_SCOPE;
     }
 
     public visitBinOpAST(node: BinOpAST): number {
@@ -62,12 +69,13 @@ export class Interpreter extends ASTVisitor {
 
     public visitAssignAST(node: AssignAST): void {
         const variableName = node.getLeft().getToken().getValue();
-        this.GLOABAL_SCOPE[variableName] = this.visit(node.getRight());
+        const variableValue = this.visit(node.getRight());
+        this.GLOABAL_SCOPE.set(variableName, variableValue);
     }
 
     public visitVariableAST(node: VariableAST): number {
         const variableName = node.getToken().getValue();
-        const value = this.GLOABAL_SCOPE[variableName];
+        const value = this.GLOABAL_SCOPE.get(variableName);
 
         if (!value) {
             throw new Error('Name error: ' + value);
@@ -99,6 +107,11 @@ export class Interpreter extends ASTVisitor {
     }
     
     public visitTypeAST(node: TypeAST): void {
+        // TODO:
+        return;
+    }
+
+    public visitProcedureDeclarationAST(node: ProcedureDeclarationAST): void {
         // TODO:
         return;
     }

@@ -17,6 +17,7 @@ import {
     ColonToken,
     IntegerTypeToken,
 } from '../src/tokens';
+import { ProcedureToken } from '../dist/tokens/procedure.token';
 
 describe('Tokenizer tests', () => {
     test('Recognize simplest expression', () => {
@@ -362,7 +363,7 @@ describe('Tokenizer tests', () => {
         expect(token.getType()).toBe(ETokenType.LBRACKET);
 
         token = tokenizer.getNextToken();
-        expect(token.getType()).toBe('ID');
+        expect(token.getType()).toBe(ETokenType.ID);
         expect(token.getValue()).toBe('a');
 
         token = tokenizer.getNextToken();
@@ -389,6 +390,26 @@ describe('Tokenizer tests', () => {
         token = tokenizer.getNextToken();
         expect(token).toEqual(new RBracketToken());
         expect(token.getType()).toBe(ETokenType.RBRACKET);
+
+        token = tokenizer.getNextToken();
+        expect(token).toEqual(new EOFToken());
+        expect(token.getType()).toBe(ETokenType.EOF);
+    });
+
+    test('can recognize procedure token', () => {
+        const tokenizer = new Tokenizer(`procedure p1;`);
+
+        let token = tokenizer.getNextToken();
+        expect(token).toEqual(new ProcedureToken());
+        expect(token.getType()).toBe(ETokenType.PROCEDURE);
+
+        token = tokenizer.getNextToken();
+        expect(token.getType()).toBe(ETokenType.ID);
+        expect(token.getValue()).toBe('p1');
+
+        token = tokenizer.getNextToken();
+        expect(token).toEqual(new SemicolonToken());
+        expect(token.getType()).toBe(ETokenType.SEMICOLON);
 
         token = tokenizer.getNextToken();
         expect(token).toEqual(new EOFToken());

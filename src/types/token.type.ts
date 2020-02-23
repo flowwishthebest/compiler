@@ -20,4 +20,5 @@ export enum ETokenType {
     COMMA = 'COMMA',
     PROGRAM = 'PROGRAM',
     VAR = 'VAR',
+    PROCEDURE = 'PROCEDURE',
 }
