@@ -22,6 +22,7 @@ import { ColonToken } from './tokens/colon.token';
 import { CommaToken } from './tokens/comma.token';
 import { VarToken } from './tokens/var.token';
 import { ProgramToken } from './tokens/program.token';
+import { ProcedureToken } from './tokens/procedure.token';
 
 function isDigit(char: string): boolean {
     return '0' <= char && char <= '9';
@@ -66,7 +67,8 @@ export class Tokenizer {
             .set('float', new FloatTypeToken())
             .set('div', new IntegerDivToken())
             .set('var', new VarToken())
-            .set('program', new ProgramToken());
+            .set('program', new ProgramToken())
+            .set('procedure', new ProcedureToken());
     }
 
     public getNextToken(): Token {

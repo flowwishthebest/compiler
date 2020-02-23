@@ -5,6 +5,7 @@ import { ProgramAST } from "./ast/program.ast";
 import { BinOpAST, NumberAST, UnaryOpAST, CompoundAST, EmptyAST, AssignAST, VariableAST } from "./ast";
 import { VariableDeclarationAST } from "./ast/variable-declaration.ast";
 import { VariableSymbol } from "./symbols";
+import { ProcedureDeclarationAST } from "./ast/procedure-declaration.ast";
 
 export class SymbolTableBuilder extends ASTVisitor {
     public readonly _symbolTable: SymbolTable;
@@ -71,5 +72,10 @@ export class SymbolTableBuilder extends ASTVisitor {
         if (!varSymbol) {
             throw new Error('Name error: ' + varName); 
         }
+    }
+
+    public visitProcedureDeclarationAST(node: ProcedureDeclarationAST): void {
+        // TODO:
+        return;
     }
 }

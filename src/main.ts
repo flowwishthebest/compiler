@@ -1,22 +1,38 @@
 import { Parser } from './parser';
 import { Tokenizer } from './tokenizer';
 import { Interpreter } from './interpreter';
+import { SymbolTableBuilder } from './symbol-table-builder';
 
 (function main(): any {
     const tokenizer = new Tokenizer(`
-        program TokenizerTest;
-        var a : integer; y : float;
-        { // tokenizer test block. this line will be skipped
-            a := 2;
-            b := 10 * a + 10 * a div 4;
-            y := 20 div 7 + 3.14;
-        }  // tokenizer test block end. this line will be skipped to
+        program Feature11;
+        var a: integer;
+    
+        procedure p1;
+        var a: float; k: integer;
+    
+        procedure p2;
+        var a, z: integer;
+        { // p2
+            z := 777;
+        }; // end p2
+        
+        { // p1
+            
+        }; // end p1
+        
+        { // Feature11
+            a := 10;
+        } // Feature1
     `);
 
+    const symbolTableBuilder = new SymbolTableBuilder();
     const parser = new Parser(tokenizer);
-    const interpreter = new Interpreter(parser);
+    const tree = parser.parse();
+    const interpreter = new Interpreter(tree);
 
     interpreter.interpret();
+    symbolTableBuilder.visit(tree);
 
-    console.log('GLOBAL_SCOPE', interpreter.GLOABAL_SCOPE);
+    console.log('GLOBAL_SCOPE', interpreter.getGlobalScope());
 })();

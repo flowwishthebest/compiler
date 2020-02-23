@@ -27,6 +27,8 @@ import { TypeAST } from './ast/type.ast';
 import { FloatTypeToken } from './tokens/float-type.token';
 import { ProgramAST } from './ast/program.ast';
 import { IntegerDivToken } from './tokens/integer-div.token';
+import { ProcedureToken } from './tokens/procedure.token';
+import { ProcedureDeclarationAST } from './ast/procedure-declaration.ast';
 
 export class Parser {
     // @Parser = [token, ..., token] -> ast
@@ -221,7 +223,12 @@ export class Parser {
     }
 
     private _declarations(): Array<VariableDeclarationAST> {
-        // declarations : VAR (variable_declaration SEMI)+ | empty
+        /**
+         *  declarations : VAR (variable_declaration SEMI)+
+         *      | (PROCEDURE ID SEMI block SEMI)* 
+         *      | empty
+         **/
+
         const declarations = [];
         if (this._currentToken instanceof VarToken) {
             this._setNext();
@@ -232,6 +239,26 @@ export class Parser {
                 this._setNext(); // remove ;
             }
         }
+        
+        while (this._currentToken instanceof ProcedureToken) {
+            this._setNext(); // remove procedure token;
+            const procedureName = this._currentToken;
+
+            this._setNext(); // remove procedure name;
+            this._setNext(); // remove ;
+            
+            const block = this._block();
+
+            const procedureDecl = new ProcedureDeclarationAST(
+                procedureName,
+                block,
+            );
+
+            declarations.push(procedureDecl);
+
+            this._setNext();
+        }
+
         return declarations;
     }
 
