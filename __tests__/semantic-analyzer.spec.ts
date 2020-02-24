@@ -1,15 +1,15 @@
 import { Tokenizer } from "../src/tokenizer";
 import { Parser } from "../src/parser";
-import { SymbolTableBuilder } from '../src/symbol-table-builder';
+import { SemanticAnalyzer } from '../src/semantic-analyzer';
 
-describe('Symbol table tests', () => {
+describe('Semantic analyzer tests', () => {
     test('Name error 1', () => {
         const program = `program NameError1; var a : integer; { a := 2 + b; }`;
         const tokenizer = new Tokenizer(program);
         const parser = new Parser(tokenizer);
         
         const ast = parser.parse();
-        const symbolTableBuilder = new SymbolTableBuilder();
+        const symbolTableBuilder = new SemanticAnalyzer();
         
         try {
             symbolTableBuilder.visit(ast);
@@ -30,7 +30,7 @@ describe('Symbol table tests', () => {
         const parser = new Parser(tokenizer);
         
         const ast = parser.parse();
-        const symbolTableBuilder = new SymbolTableBuilder();
+        const symbolTableBuilder = new SemanticAnalyzer();
         
         try {
             symbolTableBuilder.visit(ast);

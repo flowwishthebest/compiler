@@ -7,7 +7,7 @@ import { VariableDeclarationAST } from "./ast/variable-declaration.ast";
 import { VariableSymbol } from "./symbols";
 import { ProcedureDeclarationAST } from "./ast/procedure-declaration.ast";
 
-export class SymbolTableBuilder extends ASTVisitor {
+export class SemanticAnalyzer extends ASTVisitor {
     public readonly _symbolTable: SymbolTable;
 
     constructor() {
@@ -51,6 +51,10 @@ export class SymbolTableBuilder extends ASTVisitor {
         const typeName = node.getType().getToken().getValue();
         const typeSymbol = this._symbolTable.lookup(typeName);
         const varName = node.getVariable().getToken().getValue();
+        console.log('Ama there', typeName, typeSymbol, varName);
+        if (this._symbolTable.lookup(varName)) {
+            throw new Error('Duplicate identifier: ' + varName);
+        }
         this._symbolTable.define(new VariableSymbol(varName, typeSymbol));
     }
 
@@ -66,6 +70,7 @@ export class SymbolTableBuilder extends ASTVisitor {
     }
 
     public visitVariableAST(node: VariableAST): void {
+        console.log('Ama there', node);
         const varName = node.getToken().getValue();
         const varSymbol = this._symbolTable.lookup(varName);
     
