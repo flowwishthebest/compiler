@@ -1,4 +1,5 @@
-import { MySymbol, BuiltinTypeSymbol } from "./symbols"
+import { MySymbol } from "./symbols/my.symbol";
+import { BuiltinTypeSymbol } from "./symbols/builtin-type.symbol";
 
 interface Options {
     trace?: boolean;

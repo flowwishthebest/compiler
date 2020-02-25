@@ -30,7 +30,6 @@ import { IntegerDivToken } from './tokens/integer-div.token';
 import { ProcedureToken } from './tokens/procedure.token';
 import { ProcedureDeclarationAST } from './ast/procedure-declaration.ast';
 import { ParametersAST } from './ast/parameters.ast';
-import { threadId } from 'worker_threads';
 
 export class Parser {
     // @Parser = [token, ..., token] -> ast

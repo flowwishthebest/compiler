@@ -1,4 +1,5 @@
-import { MySymbol, VariableSymbol } from "./symbols";
+import { MySymbol } from "./my.symbol";
+import { VariableSymbol } from "./variable.symbol";
 
 export class ProcedureSymbol extends MySymbol {
     constructor(

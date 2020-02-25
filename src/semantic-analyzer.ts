@@ -4,9 +4,9 @@ import { BlockAST } from "./ast/block.ast";
 import { ProgramAST } from "./ast/program.ast";
 import { BinOpAST, NumberAST, UnaryOpAST, CompoundAST, EmptyAST, AssignAST, VariableAST } from "./ast";
 import { VariableDeclarationAST } from "./ast/variable-declaration.ast";
-import { VariableSymbol } from "./symbols";
 import { ProcedureDeclarationAST } from "./ast/procedure-declaration.ast";
-import { ProcedureSymbol } from "./procedure.symbol";
+import { ProcedureSymbol } from "./symbols/procedure.symbol";
+import { VariableSymbol } from "./symbols/variable.symbol";
 
 export class SemanticAnalyzer extends ASTVisitor {
     public  _scope: ScopedSymbolTable;
@@ -47,6 +47,7 @@ export class SemanticAnalyzer extends ASTVisitor {
         this.visit(node.getRight());
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public visitNumberAST(node: NumberAST): void {
         // TODO:
         return;
@@ -60,6 +61,7 @@ export class SemanticAnalyzer extends ASTVisitor {
         node.getChildren().forEach((c) => this.visit(c));
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public visitEmptyAST(node: EmptyAST): void {
         // TODO:
         return;
