@@ -20,27 +20,27 @@ import { SemanticAnalyzer } from './semantic-analyzer';
 // })();
 
 
-(function a(): any {
-    const text = `
-        program Main;
-        var x, y : float;
+// (function a(): any {
+//     const text = `
+//         program Main;
+//         var x, y : float;
 
-        procedure Alpha(a: integer);
-            var y: integer;
-        {};
+//         procedure Alpha(a: integer);
+//             var y: integer;
+//         {};
 
-        { // Main
+//         { // Main
 
-        } // end Main;`;
+//         } // end Main;`;
 
-    const lexer = new Tokenizer(text);
-    const parser = new Parser(lexer);
-    const tree = parser.parse();
-    const semanticAnalyzer = new SemanticAnalyzer();
-    semanticAnalyzer.visit(tree);
+//     const lexer = new Tokenizer(text);
+//     const parser = new Parser(lexer);
+//     const tree = parser.parse();
+//     const semanticAnalyzer = new SemanticAnalyzer();
+//     semanticAnalyzer.visit(tree);
 
-    // console.log(semanticAnalyzer._scope.print());
-})();
+//     // console.log(semanticAnalyzer._scope.print());
+// })();
 
 
 (function b(): any {
@@ -50,10 +50,11 @@ import { SemanticAnalyzer } from './semantic-analyzer';
         procedure Alpha(a: integer);
             var y: integer;
         {
-            x := b + x + y; { ERROR here! }
+            x := a + x + y;
         };
-        { // Main
-        } // Main
+        {
+
+        }
     `;
 
     const lexer = new Tokenizer(text);

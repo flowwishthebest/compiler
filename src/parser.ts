@@ -29,6 +29,8 @@ import { ProgramAST } from './ast/program.ast';
 import { IntegerDivToken } from './tokens/integer-div.token';
 import { ProcedureToken } from './tokens/procedure.token';
 import { ProcedureDeclarationAST } from './ast/procedure-declaration.ast';
+import { ParametersAST } from './ast/parameters.ast';
+import { threadId } from 'worker_threads';
 
 export class Parser {
     // @Parser = [token, ..., token] -> ast
@@ -230,47 +232,76 @@ export class Parser {
          **/
 
         const declarations = [];
-        if (this._currentToken instanceof VarToken) {
-            this._setNext();
 
-            while (this._currentToken instanceof IdToken) {
-                const variableDeclaration = this._variableDeclaration();
-                declarations.push(...variableDeclaration);
+        for (;;) {
+            if (this._currentToken instanceof VarToken) {
+                this._setNext();
+    
+                while (this._currentToken instanceof IdToken) {
+                    const variableDeclaration = this._variableDeclaration();
+                    declarations.push(...variableDeclaration);
+                    this._setNext(); // remove ;
+                }
+            } else if (this._currentToken instanceof ProcedureToken) {
+                this._setNext(); // remove procedure kw
+    
+                const procName = this._currentToken;
+    
+                this._setNext(); // remove ID
+    
+                let params = [];
+    
+                if (this._currentToken instanceof LParenToken) {
+                    this._setNext(); // remove (
+    
+                    params = this._formalParameterList();
+    
+                    this._setNext(); // remove )
+    
+                }
+    
                 this._setNext(); // remove ;
+    
+                const blockNode = this._block();
+    
+                const procDecl = new ProcedureDeclarationAST(
+                    procName,
+                    params,
+                    blockNode,
+                );
+    
+                declarations.push(procDecl);
+    
+                this._setNext(); // remove ;
+            } else {
+                break;
             }
-        }
-        
-        while (this._currentToken instanceof ProcedureToken) {
-            this._setNext(); // remove procedure token;
-            const procedureName = this._currentToken;
-
-            this._setNext(); // remove procedure name;
-            this._setNext(); // remove ;
-            
-            const block = this._block();
-
-            const procedureDecl = new ProcedureDeclarationAST(
-                procedureName,
-                [],
-                block,
-            );
-
-            declarations.push(procedureDecl);
-
-            this._setNext();
         }
 
         return declarations;
     }
 
-    private _formalParameterList(): any {
+    private _formalParameterList(): Array<ParametersAST> {
         /**
          *  formal_parameter_list : formal_parameters   |
          *  formal_parameters SEMI formal_parameter_list
          * */ 
+
+         if (!(this._currentToken instanceof IdToken)) {
+             return [];
+         }
+
+         const paramNodes = this._formalParameters();
+
+         while (this._currentToken instanceof SemicolonToken) {
+             this._setNext(); // remove ;
+             paramNodes.push(...this._formalParameters());
+         }
+
+         return paramNodes;
     }
 
-    private _formalParameters(): any {
+    private _formalParameters(): Array<ParametersAST> {
         /**
          * spec:
          *      > formal_parameters : ID (COMMA ID)* COLON type_spec
@@ -282,7 +313,31 @@ export class Parser {
          *      > procedure Foo(a, b: integer; c: float);
          * */
 
+         const paramNodes = [];
 
+         const paramTokens = [this._currentToken];
+         this._setNext(); // remove ID
+
+         while (this._currentToken instanceof CommaToken) {
+             this._setNext(); // remove ;
+             paramTokens.push(this._currentToken);
+             this._setNext(); // remove ID
+         }
+
+         this._setNext(); // remove :
+
+         const typeNode = this._typeSpec();
+
+         paramTokens.forEach((t) => {
+             const paramNode = new ParametersAST(
+                 new VariableAST(t),
+                 typeNode,
+             )
+
+             paramNodes.push(paramNode);
+         });
+
+         return paramNodes;
     }
 
     private _variableDeclaration(): Array<VariableDeclarationAST> {
