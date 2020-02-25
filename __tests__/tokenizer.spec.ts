@@ -17,7 +17,7 @@ import {
     ColonToken,
     IntegerTypeToken,
 } from '../src/tokens';
-import { ProcedureToken } from '../dist/tokens/procedure.token';
+import { ProcedureToken } from '../src/tokens/procedure.token';
 
 describe('Tokenizer tests', () => {
     test('Recognize simplest expression', () => {
