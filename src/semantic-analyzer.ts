@@ -1,18 +1,19 @@
 import { ASTVisitor } from "./ast-visitor"
-import { SymbolTable } from "./symbol-table"
+import { ScopedSymbolTable } from "./scoped-symbol-table"
 import { BlockAST } from "./ast/block.ast";
 import { ProgramAST } from "./ast/program.ast";
 import { BinOpAST, NumberAST, UnaryOpAST, CompoundAST, EmptyAST, AssignAST, VariableAST } from "./ast";
 import { VariableDeclarationAST } from "./ast/variable-declaration.ast";
-import { VariableSymbol } from "./symbols";
 import { ProcedureDeclarationAST } from "./ast/procedure-declaration.ast";
+import { ProcedureSymbol } from "./symbols/procedure.symbol";
+import { VariableSymbol } from "./symbols/variable.symbol";
 
 export class SemanticAnalyzer extends ASTVisitor {
-    public readonly _symbolTable: SymbolTable;
+    public  _scope: ScopedSymbolTable;
 
     constructor() {
         super();
-        this._symbolTable = new SymbolTable();
+        this._scope = null;
     }
 
     public visitBlockAST(node: BlockAST): void {
@@ -21,7 +22,24 @@ export class SemanticAnalyzer extends ASTVisitor {
     }
 
     public visitProgramAST(node: ProgramAST): void {
+        const globalScope = new ScopedSymbolTable({
+            scopeName: 'global',
+            scopeLevel: 1,
+            enclosingScope: this._scope, // will be null,
+            initBuiltins: true,
+        });
+
+        this._scope = globalScope;
+
+        console.log(`Enter scope: <${this._scope.getScopeName()}>`);
+
         this.visit(node.getBlock());
+
+        globalScope.print();
+
+        console.log(`Leave scope: <${this._scope.getScopeName()}>`);
+
+        this._scope = this._scope.getEnclosingScope();
     }
 
     public visitBinOpAST(node: BinOpAST): void {
@@ -29,6 +47,7 @@ export class SemanticAnalyzer extends ASTVisitor {
         this.visit(node.getRight());
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public visitNumberAST(node: NumberAST): void {
         // TODO:
         return;
@@ -42,6 +61,7 @@ export class SemanticAnalyzer extends ASTVisitor {
         node.getChildren().forEach((c) => this.visit(c));
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public visitEmptyAST(node: EmptyAST): void {
         // TODO:
         return;
@@ -49,18 +69,19 @@ export class SemanticAnalyzer extends ASTVisitor {
 
     public visitVariableDeclarationAST(node: VariableDeclarationAST): void {
         const typeName = node.getType().getToken().getValue();
-        const typeSymbol = this._symbolTable.lookup(typeName);
+
+        const typeSymbol = this._scope.lookup(typeName);
+
         const varName = node.getVariable().getToken().getValue();
-        console.log('Ama there', typeName, typeSymbol, varName);
-        if (this._symbolTable.lookup(varName)) {
-            throw new Error('Duplicate identifier: ' + varName);
-        }
-        this._symbolTable.define(new VariableSymbol(varName, typeSymbol));
+
+        const variableSymbol = new VariableSymbol(varName, typeSymbol);
+
+        this._scope.define(variableSymbol);
     }
 
     public visitAssignAST(node: AssignAST): void | never {
         const varName = node.getLeft().getToken().getValue();
-        const varSymbol = this._symbolTable.lookup(varName);
+        const varSymbol = this._scope.lookup(varName);
 
         if (!varSymbol) {
             throw new Error('Name error: ' + varName);
@@ -70,17 +91,51 @@ export class SemanticAnalyzer extends ASTVisitor {
     }
 
     public visitVariableAST(node: VariableAST): void {
-        console.log('Ama there', node);
         const varName = node.getToken().getValue();
-        const varSymbol = this._symbolTable.lookup(varName);
+
+        const varSymbol = this._scope.lookup(varName);
     
         if (!varSymbol) {
-            throw new Error('Name error: ' + varName); 
+            throw new Error(`Symbol (Indentifier) not found <${varName}>`); 
         }
     }
 
     public visitProcedureDeclarationAST(node: ProcedureDeclarationAST): void {
-        // TODO:
-        return;
+        const procedureName = node.getName().getValue(); // TODO: api fix
+        const procedureSymbol = new ProcedureSymbol(procedureName);
+
+        this._scope.define(procedureSymbol);
+
+        const procedureScope = new ScopedSymbolTable({
+            scopeName: procedureName,
+            scopeLevel: this._scope.getScopeLevel() + 1,
+            enclosingScope: this._scope,
+        });
+
+        this._scope = procedureScope;
+
+        console.log(`Enter scope: <${this._scope.getScopeName()}>`);
+
+        node.getParameters().forEach((param) => {
+            const type = param.getTypeNode().getToken().getValue();
+
+            const paramType = this._scope.lookup(type);
+
+            const paramName = param.getVarNode().getToken().getValue();
+
+            const varSymbol = new VariableSymbol(paramName, paramType);
+
+            this._scope.define(varSymbol);
+
+            procedureSymbol.getParams().push(varSymbol);
+        });
+
+        this.visit(node.getBlock());
+
+        procedureScope.print();
+
+        console.log(`Leave scope: <${this._scope.getScopeName()}>`);
+
+        this._scope = this._scope.getEnclosingScope();
     }
 }

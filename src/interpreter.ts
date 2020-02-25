@@ -1,4 +1,3 @@
-import { Parser } from "./parser";
 import { FloatDivToken, MinusToken, MulToken, PlusToken } from "./tokens";
 import { ASTVisitor } from "./ast-visitor";
 import { UnaryOpAST, NumberAST, BinOpAST, EmptyAST, CompoundAST, AssignAST, VariableAST, AST } from "./ast";
@@ -88,6 +87,7 @@ export class Interpreter extends ASTVisitor {
         node.getChildren().forEach((c) => this.visit(c));
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public visitEmptyAST(node: EmptyAST): void {
         return;
     }
@@ -101,16 +101,19 @@ export class Interpreter extends ASTVisitor {
         this.visit(node.getCompoundStatement());
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public visitVariableDeclarationAST(node: VariableDeclarationAST): void {
         // TODO:
         return;
     }
     
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public visitTypeAST(node: TypeAST): void {
         // TODO:
         return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public visitProcedureDeclarationAST(node: ProcedureDeclarationAST): void {
         // TODO:
         return;

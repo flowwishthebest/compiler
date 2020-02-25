@@ -16,7 +16,7 @@ describe('Semantic analyzer tests', () => {
         } catch (err) {
             expect(err).toBeDefined();
             expect(err).toBeInstanceOf(Error);
-            expect(err.message).toBe('Name error: b');
+            expect(err.message).toBe('Symbol (Indentifier) not found <b>');
         } 
     });
 
