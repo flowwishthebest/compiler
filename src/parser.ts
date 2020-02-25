@@ -224,8 +224,8 @@ export class Parser {
 
     private _declarations(): Array<VariableDeclarationAST> {
         /**
-         *  declarations : VAR (variable_declaration SEMI)+
-         *      | (PROCEDURE ID SEMI block SEMI)* 
+         *  declarations : (VAR (variable_declaration SEMI)+)*
+         *      | (PROCEDURE ID (LPAREN formal_parameter_list RPAREN)? SEMI block SEMI)*
          *      | empty
          **/
 
@@ -251,6 +251,7 @@ export class Parser {
 
             const procedureDecl = new ProcedureDeclarationAST(
                 procedureName,
+                [],
                 block,
             );
 
@@ -260,6 +261,28 @@ export class Parser {
         }
 
         return declarations;
+    }
+
+    private _formalParameterList(): any {
+        /**
+         *  formal_parameter_list : formal_parameters   |
+         *  formal_parameters SEMI formal_parameter_list
+         * */ 
+    }
+
+    private _formalParameters(): any {
+        /**
+         * spec:
+         *      > formal_parameters : ID (COMMA ID)* COLON type_spec
+         * 
+         * example:
+         *      > procedure Foo;
+         *      > procedure Foo(a: integer);
+         *      > procedure Foo(a, b: integer);
+         *      > procedure Foo(a, b: integer; c: float);
+         * */
+
+
     }
 
     private _variableDeclaration(): Array<VariableDeclarationAST> {
