@@ -10,7 +10,6 @@ import { UnaryOpAST } from './ast/unary-op.ast';
 import { LBracketToken } from './tokens/lbracket.token';
 import { IdToken } from './tokens/id.token';
 import { SemicolonToken } from './tokens/semicolon.token';
-import { ColonToken, IntegerTypeToken } from './tokens';
 import { AssignAST } from './ast/assign.ast';
 import { EmptyAST } from './ast/empty.ast';
 import { CompoundAST } from './ast/compound.ast';
@@ -24,34 +23,37 @@ import { VariableDeclarationAST } from './ast/variable-declaration.ast';
 import { VarToken } from './tokens/var.token';
 import { CommaToken } from './tokens/comma.token';
 import { TypeAST } from './ast/type.ast';
-import { FloatTypeToken } from './tokens/float-type.token';
 import { ProgramAST } from './ast/program.ast';
 import { IntegerDivToken } from './tokens/integer-div.token';
 import { ProcedureToken } from './tokens/procedure.token';
 import { ProcedureDeclarationAST } from './ast/procedure-declaration.ast';
 import { ParametersAST } from './ast/parameters.ast';
+import { ParserError } from './errors/parser.error';
+import { EErrorType } from './types/error.type';
+import { ETokenType } from './types';
+
+const UNEXPECTED_TOKEN_MESSAGE = (token: Token): string =>
+    `Unexpected token met -> ${token.toString()}`;
 
 export class Parser {
-    // @Parser = [token, ..., token] -> ast
-
     private _currentToken: Token;
 
-    constructor(private readonly _tokenizer: Tokenizer) {}
+    constructor(private readonly _tokenizer: Tokenizer) {
+        this._currentToken = this._tokenizer.getNextToken();
+    }
 
     public parse(): AST {
         const ast = this._programm();
 
-        // if (this._currentToken.constructor !== EOFToken) {
-        //     throw new SyntaxError('parse error');
-        // }
+        this._eat(ETokenType.EOF);
 
         return ast;
     }
 
     private _expr(): AST { // term ((PLUS | MINUS) term)*
-        if (!this._currentToken) {
-            this._setNext();
-        }
+        // if (!this._currentToken) {
+        //     this._setNext();
+        // }
 
         let node = this._term();
 
@@ -62,9 +64,9 @@ export class Parser {
             const token = this._currentToken;
 
             if (token instanceof PlusToken) {
-                this._setNext();
+                this._eat(ETokenType.PLUS);
             } else if (token instanceof MinusToken) {
-                this._setNext();
+                this._eat(ETokenType.MINUS);
             }
 
             node = new BinOpAST(node, token, this._term());
@@ -78,24 +80,29 @@ export class Parser {
         const token = this._currentToken;
 
         if (token instanceof PlusToken) {
-            this._setNext();
+            this._eat(ETokenType.PLUS);
             return new UnaryOpAST(token, this._factor());
         }
 
         if (token instanceof MinusToken) {
-            this._setNext();
+            this._eat(ETokenType.MINUS);
             return new UnaryOpAST(token, this._factor());
         }
 
-        if (token instanceof IntegerConstToken || token instanceof FloatConstToken) {
-            this._setNext();
+        if (token instanceof IntegerConstToken) {
+            this._eat(ETokenType.INTEGER_CONST);
+            return new NumberAST(token);
+        }
+
+        if (token instanceof FloatConstToken) {
+            this._eat(ETokenType.FLOAT_CONST);
             return new NumberAST(token);
         }
 
         if (token instanceof LParenToken) {
-            this._setNext(); // remove lparen
+            this._eat(ETokenType.LPAREN); // remove lparen
             const ast = this._expr();
-            this._setNext(); // remove rparen
+            this._eat(ETokenType.RPAREN); // remove rparen
             return ast;
         }
 
@@ -115,11 +122,11 @@ export class Parser {
             const token = this._currentToken;
 
             if (token instanceof FloatDivToken) {
-                this._setNext();
+                this._eat(ETokenType.FLOAT_DIV);
             } else if (token instanceof MulToken) {
-                this._setNext();
+                this._eat(ETokenType.MUL);
             } else if (token instanceof IntegerDivToken) {
-                this._setNext();
+                this._eat(ETokenType.INTEGER_DIV);
             }
 
             node = new BinOpAST(node, token, this._factor());
@@ -130,12 +137,12 @@ export class Parser {
 
     private _programm(): ProgramAST {
         // program : compound_statement DOT
-        this._setNext(); // setup token
-        this._setNext(); // remove programm kw
+        // this._setNext(); // setup token
+        this._eat(ETokenType.PROGRAM); // remove programm kw
         const varNode = this._variable();
         const progName = varNode.getToken().getValue();
 
-        this._setNext(); // remove ;
+        this._eat(ETokenType.SEMICOLON); // remove ;
 
         const block = this._block();
 
@@ -145,10 +152,13 @@ export class Parser {
     }
 
     private _compoundStatement(): CompoundAST {
-        // compound_statement: BEGIN statement_list END
-        this._setNext(); // remove {
+        /**
+         * compound_statement: BEGIN statement_list END
+        **/
+
+        this._eat(ETokenType.LBRACKET); // remove {
         const nodes = this._statementList();
-        this._setNext(); // remove }
+        this._eat(ETokenType.RBRACKET); // remove }
 
         const comp = new CompoundAST();
 
@@ -167,7 +177,7 @@ export class Parser {
         const results = [node];
 
         while (this._currentToken.constructor === SemicolonToken) {
-            this._setNext();
+            this._eat(ETokenType.SEMICOLON);
             results.push(this._statement());
         }
 
@@ -199,7 +209,7 @@ export class Parser {
 
         const left = this._variable();
         const op = this._currentToken;
-        this._setNext();
+        this._eat(ETokenType.ASSIGN);
         const right = this._expr();
 
         return new AssignAST(left, op, right);
@@ -207,7 +217,7 @@ export class Parser {
 
     private _variable(): VariableAST {
         const node = new VariableAST(this._currentToken);
-        this._setNext();
+        this._eat(ETokenType.ID);
         return node;
     }
 
@@ -223,58 +233,65 @@ export class Parser {
         return new BlockAST(declarations, compoundStatement);
     }
 
+    private _procedureDeclaration(): ProcedureDeclarationAST {
+        /**
+         * procedure_declaration :
+         * PROCEDURE ID (LPAREN formal_parameter_list RPAREN)? SEMI block SEMI
+        **/
+
+       this._eat(ETokenType.PROCEDURE); // remove prog kw
+    
+       const procName = this._currentToken;
+
+       this._eat(ETokenType.ID) // remove ID
+
+       let params = [];
+
+       if (this._currentToken instanceof LParenToken) {
+           this._eat(ETokenType.LPAREN); // remove (
+
+           params = this._formalParameterList();
+
+           this._eat(ETokenType.RPAREN); // remove )
+
+       }
+
+       this._eat(ETokenType.SEMICOLON); // remove ;
+
+       const blockNode = this._block();
+
+       const procDecl = new ProcedureDeclarationAST(
+           procName,
+           params,
+           blockNode,
+       );
+       
+       this._eat(ETokenType.SEMICOLON); // remove ;
+
+       return procDecl;
+    }
+
     private _declarations(): Array<VariableDeclarationAST> {
         /**
-         *  declarations : (VAR (variable_declaration SEMI)+)*
-         *      | (PROCEDURE ID (LPAREN formal_parameter_list RPAREN)? SEMI block SEMI)*
-         *      | empty
+         * declarations :
+         * (VAR (variable_declaration SEMI)+)? procedure_declaration*
          **/
 
         const declarations = [];
 
-        for (;;) {
-            if (this._currentToken instanceof VarToken) {
-                this._setNext();
-    
-                while (this._currentToken instanceof IdToken) {
-                    const variableDeclaration = this._variableDeclaration();
-                    declarations.push(...variableDeclaration);
-                    this._setNext(); // remove ;
-                }
-            } else if (this._currentToken instanceof ProcedureToken) {
-                this._setNext(); // remove procedure kw
-    
-                const procName = this._currentToken;
-    
-                this._setNext(); // remove ID
-    
-                let params = [];
-    
-                if (this._currentToken instanceof LParenToken) {
-                    this._setNext(); // remove (
-    
-                    params = this._formalParameterList();
-    
-                    this._setNext(); // remove )
-    
-                }
-    
-                this._setNext(); // remove ;
-    
-                const blockNode = this._block();
-    
-                const procDecl = new ProcedureDeclarationAST(
-                    procName,
-                    params,
-                    blockNode,
-                );
-    
-                declarations.push(procDecl);
-    
-                this._setNext(); // remove ;
-            } else {
-                break;
+        if (this._currentToken instanceof VarToken) {
+            this._eat(ETokenType.VAR);
+
+            while (this._currentToken instanceof IdToken) {
+                const variableDeclaration = this._variableDeclaration();
+                declarations.push(...variableDeclaration);
+                this._eat(ETokenType.SEMICOLON); // remove ;
             }
+        }
+
+        while (this._currentToken instanceof ProcedureToken) {
+            const procDecl = this._procedureDeclaration();
+            declarations.push(procDecl);
         }
 
         return declarations;
@@ -293,7 +310,7 @@ export class Parser {
          const paramNodes = this._formalParameters();
 
          while (this._currentToken instanceof SemicolonToken) {
-             this._setNext(); // remove ;
+             this._eat(ETokenType.SEMICOLON); // remove ;
              paramNodes.push(...this._formalParameters());
          }
 
@@ -315,15 +332,15 @@ export class Parser {
          const paramNodes = [];
 
          const paramTokens = [this._currentToken];
-         this._setNext(); // remove ID
+         this._eat(ETokenType.ID); // remove ID
 
          while (this._currentToken instanceof CommaToken) {
-             this._setNext(); // remove ;
+             this._eat(ETokenType.SEMICOLON); // remove ;
              paramTokens.push(this._currentToken);
-             this._setNext(); // remove ID
+             this._eat(ETokenType.ID); // remove ID
          }
 
-         this._setNext(); // remove :
+         this._eat(ETokenType.COLON); // remove :
 
          const typeNode = this._typeSpec();
 
@@ -343,18 +360,14 @@ export class Parser {
         // variable_declaration : ID (COMMA ID)* COLON type_spec
 
         const varibleNode = [new VariableAST(this._currentToken)];
-        this._setNext();
+        this._eat(ETokenType.ID);
         while (this._currentToken instanceof CommaToken) {
-            this._setNext();
+            this._eat(ETokenType.COMMA);
             varibleNode.push(new VariableAST(this._currentToken));
-            this._setNext();
+            this._eat(ETokenType.ID);
         }
         
-        if (this._currentToken instanceof ColonToken) {
-            this._setNext(); // remove colon
-        } else {
-            throw new Error('Expected colon after var declaration');
-        }
+        this._eat(ETokenType.COLON); 
         
         const typeNode = this._typeSpec();
         const variableDeclarations = [];
@@ -372,13 +385,13 @@ export class Parser {
         // type_spec : integer | real
 
         const token = this._currentToken;
-        switch (token.constructor) {
-            case IntegerTypeToken: {
-                this._setNext();
+        switch (token.getType()) {
+            case ETokenType.INTEGER: {
+                this._eat(ETokenType.INTEGER);
                 break;
             }
-            case FloatTypeToken: {
-                this._setNext();
+            case ETokenType.FLOAT: {
+                this._eat(ETokenType.FLOAT);
                 break;
             }
             default: {
@@ -389,7 +402,19 @@ export class Parser {
         return new TypeAST(token);
     }
 
-    private _setNext(): void {
-        this._currentToken = this._tokenizer.getNextToken();
+    private _eat(type: ETokenType): void | never {
+        if (this._currentToken.getType() === type) {
+            this._currentToken = this._tokenizer.getNextToken();
+        } else {
+            this._throw(
+                UNEXPECTED_TOKEN_MESSAGE(this._currentToken),
+                EErrorType.UNEXPECTED_TOKEN,
+                this._currentToken,
+            );
+        }
+    }
+
+    private _throw(msg: string, errType: EErrorType, token: Token): never {
+        throw new ParserError(msg, errType, token);
     }
 }

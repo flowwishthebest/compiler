@@ -23,6 +23,7 @@ import { CommaToken } from './tokens/comma.token';
 import { VarToken } from './tokens/var.token';
 import { ProgramToken } from './tokens/program.token';
 import { ProcedureToken } from './tokens/procedure.token';
+import { TokenizerError } from './errors/tokenizer.error';
 
 function isDigit(char: string): boolean {
     return '0' <= char && char <= '9';
@@ -57,6 +58,9 @@ export class Tokenizer {
 
     private _position = 0;
     private _currentChar: string;
+
+    private _lineNo = 1;
+    private _columnNo = 1;
 
     constructor(private readonly _sourceCode: string) {
         this._currentChar = this._sourceCode.charAt(this._position);
@@ -147,9 +151,13 @@ export class Tokenizer {
                     return new SemicolonToken();
                 }
                 default: {
-                    throw new Error(
-                        `Unsupported token type: ${this._currentChar}`
+                    const msg = (
+                        `Lexer error on ${this._currentChar} ` +
+                        `line: ${this._lineNo} ` +
+                        `column: ${this._columnNo}`
                     );
+
+                    throw new TokenizerError(msg);
                 }
             }
         }
@@ -199,8 +207,15 @@ export class Tokenizer {
     }
 
     private _toNextChar(): void {
+        if (this._currentChar === '\n') {
+            this._lineNo += 1;
+            this._columnNo = 0;
+        }
+
         this._position += 1;
         this._currentChar = this._sourceCode.charAt(this._position);
+
+        this._columnNo += 1;
     }
     
     private _peek(): string {

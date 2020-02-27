@@ -2,7 +2,7 @@ import { MySymbol } from "./symbols/my.symbol";
 import { BuiltinTypeSymbol } from "./symbols/builtin-type.symbol";
 
 interface Options {
-    trace?: boolean;
+    shoudLogScope?: boolean;
     logger?: any;
 }
 
@@ -13,6 +13,10 @@ interface KwArgs {
     initBuiltins?: boolean;
 }
 
+interface LookupParams {
+    currentScopeOnly?: boolean;
+}
+
 export class ScopedSymbolTable {
     private readonly _symbols: Map<string, MySymbol>;
 
@@ -20,9 +24,11 @@ export class ScopedSymbolTable {
     private readonly _scopeLevel: number;
     private readonly _enclosingScope: ScopedSymbolTable;
 
+    private readonly _logScope: boolean;
+
     constructor(
         kwArgs: KwArgs,
-        private readonly _options: Options = { trace: true },
+        private readonly _options: Options = { shoudLogScope: false },
     ) {
         this._symbols = new Map();
         this._scopeName = kwArgs.scopeName;
@@ -80,24 +86,24 @@ export class ScopedSymbolTable {
     }
 
     public define(symbol: MySymbol): this {
-        if (this._options.trace) {
-            console.log('Define: ' + symbol.getName());
-        }
+        this._log('Define: ' + symbol.getName());
         this._symbols.set(symbol.getName(), symbol);
         return this;
     }
 
-    public lookup(name: string): MySymbol | null {
-        if (this._options.trace) {
-            console.log(`Lookup: ${name}, (Scope name: ${this.getScopeName()})`);
-        }
+    public lookup(
+        name: string,
+        opts: LookupParams = { currentScopeOnly: false },
+    ): MySymbol | null {
+
+        this._log(`Lookup: ${name}, (Scope name: ${this.getScopeName()})`);
 
         if (this._symbols.has(name)) {
             return this._symbols.get(name);
-        } else {
-            if (this.getEnclosingScope()) {
-                return this.getEnclosingScope().lookup(name);
-            }
+        }
+        
+        if (!opts.currentScopeOnly && this.getEnclosingScope()) {
+            return this.getEnclosingScope().lookup(name);
         }
 
         return null;
@@ -106,5 +112,11 @@ export class ScopedSymbolTable {
     private _initBuiltins(): void {
         this.define(new BuiltinTypeSymbol('integer'));
         this.define(new BuiltinTypeSymbol('float'));
+    }
+
+    private _log(msg: string): void {
+        if (this._logScope) {
+            (this._options.logger || console).log(msg);
+        }
     }
 }

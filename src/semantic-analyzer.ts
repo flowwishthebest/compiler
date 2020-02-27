@@ -1,23 +1,49 @@
 import { ASTVisitor } from "./ast-visitor"
 import { ScopedSymbolTable } from "./scoped-symbol-table"
-import { BlockAST } from "./ast/block.ast";
-import { ProgramAST } from "./ast/program.ast";
-import { BinOpAST, NumberAST, UnaryOpAST, CompoundAST, EmptyAST, AssignAST, VariableAST } from "./ast";
-import { VariableDeclarationAST } from "./ast/variable-declaration.ast";
-import { ProcedureDeclarationAST } from "./ast/procedure-declaration.ast";
-import { ProcedureSymbol } from "./symbols/procedure.symbol";
-import { VariableSymbol } from "./symbols/variable.symbol";
+import { ProcedureSymbol,VariableSymbol } from "./symbols";
+import {
+    BinOpAST,
+    UnaryOpAST,
+    CompoundAST,
+    AssignAST,
+    VariableAST,
+    VariableDeclarationAST,
+    ProcedureDeclarationAST,
+    ProgramAST,
+    BlockAST,
+ } from "./ast";
+import { EErrorType } from "./types/error.type";
+import { SemanticAnalyzerError } from "./errors/semantic-analyzer.error";
+import { Token } from "./tokens/token";
+
+interface KwArgs {
+    shouldLogScope?: boolean;
+    logger?: any;
+}
+
+const DUPLICATE_ID_MESSAGE = (token: Token): string =>
+    `Duplicate ID found -> ${token.toString()}`;
+
+const ID_NOT_FOUND_MESSAGE = (token: Token): string =>
+    `Id not found -> ${token.toString()}`;
 
 export class SemanticAnalyzer extends ASTVisitor {
-    public  _scope: ScopedSymbolTable;
+    private _scope: ScopedSymbolTable;
+    private _logScope: boolean;
+    private _logger: any;
 
-    constructor() {
+    constructor(kwArgs: KwArgs = { shouldLogScope: false }) {
         super();
+
         this._scope = null;
+        this._logScope = kwArgs.shouldLogScope;
+        this._logger = kwArgs.logger || console;
     }
 
     public visitBlockAST(node: BlockAST): void {
-        node.getDeclarations().forEach((d) => this.visit(d));
+        node.getDeclarations()
+            .forEach((declaration) => this.visit(declaration));
+
         this.visit(node.getCompoundStatement());
     }
 
@@ -31,13 +57,13 @@ export class SemanticAnalyzer extends ASTVisitor {
 
         this._scope = globalScope;
 
-        console.log(`Enter scope: <${this._scope.getScopeName()}>`);
+        this._log(`Enter scope: <${this._scope.getScopeName()}>`);
 
         this.visit(node.getBlock());
 
         globalScope.print();
 
-        console.log(`Leave scope: <${this._scope.getScopeName()}>`);
+        this._log(`Leave scope: <${this._scope.getScopeName()}>`);
 
         this._scope = this._scope.getEnclosingScope();
     }
@@ -47,8 +73,7 @@ export class SemanticAnalyzer extends ASTVisitor {
         this.visit(node.getRight());
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public visitNumberAST(node: NumberAST): void {
+    public visitNumberAST(/* node: NumberAST */): void {
         // TODO:
         return;
     }
@@ -61,8 +86,7 @@ export class SemanticAnalyzer extends ASTVisitor {
         node.getChildren().forEach((c) => this.visit(c));
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public visitEmptyAST(node: EmptyAST): void {
+    public visitEmptyAST(/* node: EmptyAST */): void {
         // TODO:
         return;
     }
@@ -76,6 +100,14 @@ export class SemanticAnalyzer extends ASTVisitor {
 
         const variableSymbol = new VariableSymbol(varName, typeSymbol);
 
+        if (this._scope.lookup(varName, { currentScopeOnly: true })) {
+            this._throw(
+                DUPLICATE_ID_MESSAGE(node.getVariable().getToken()),
+                EErrorType.DUPLICATE_ID,
+                node.getVariable().getToken(),
+            );
+        }
+
         this._scope.define(variableSymbol);
     }
 
@@ -84,7 +116,11 @@ export class SemanticAnalyzer extends ASTVisitor {
         const varSymbol = this._scope.lookup(varName);
 
         if (!varSymbol) {
-            throw new Error('Name error: ' + varName);
+            this._throw(
+                ID_NOT_FOUND_MESSAGE(node.getLeft().getToken()),
+                EErrorType.ID_NOT_FOUND,
+                node.getLeft().getToken(),
+            )
         }
     
         this.visit(node.getRight());
@@ -114,7 +150,7 @@ export class SemanticAnalyzer extends ASTVisitor {
 
         this._scope = procedureScope;
 
-        console.log(`Enter scope: <${this._scope.getScopeName()}>`);
+        this._log(`Enter scope: <${this._scope.getScopeName()}>`);
 
         node.getParameters().forEach((param) => {
             const type = param.getTypeNode().getToken().getValue();
@@ -134,8 +170,18 @@ export class SemanticAnalyzer extends ASTVisitor {
 
         procedureScope.print();
 
-        console.log(`Leave scope: <${this._scope.getScopeName()}>`);
+        this._log(`Leave scope: <${this._scope.getScopeName()}>`);
 
         this._scope = this._scope.getEnclosingScope();
+    }
+
+    private _throw(msg: string, errType: EErrorType, token: Token): never {
+        throw new SemanticAnalyzerError(msg, errType, token);
+    }
+
+    private _log(msg: string): void {
+        if (this._logScope) {
+            this._logger.log(msg);
+        }
     }
 }

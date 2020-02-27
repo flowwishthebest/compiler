@@ -6,3 +6,7 @@ export * from './assign.ast';
 export * from './empty.ast';
 export * from './compound.ast';
 export * from './var.ast';
+export * from './variable-declaration.ast';
+export * from './procedure-declaration.ast';
+export * from './program.ast';
+export * from './block.ast';

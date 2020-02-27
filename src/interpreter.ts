@@ -75,11 +75,6 @@ export class Interpreter extends ASTVisitor {
     public visitVariableAST(node: VariableAST): number {
         const variableName = node.getToken().getValue();
         const value = this.GLOABAL_SCOPE.get(variableName);
-
-        if (!value) {
-            throw new Error('Name error: ' + value);
-        }
-
         return value;
     }
 
