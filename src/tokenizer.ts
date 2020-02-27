@@ -203,7 +203,8 @@ export class Tokenizer {
 
         const id = identifier.join('');
 
-        return this.RESERVED_KEYWORDS.get(id) || new IdToken(id);
+        return this.RESERVED_KEYWORDS.get(id) ||
+            new IdToken(id, this._lineNo, this._columnNo);
     }
 
     private _toNextChar(): void {
