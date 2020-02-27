@@ -275,7 +275,7 @@ describe('Tokenizer tests', () => {
         expect(token.getType()).toBe(ETokenType.LBRACKET);
 
         token = tokenizer.getNextToken();
-        expect(token).toEqual(new IdToken('age'));
+        expect(token).toEqual(new IdToken('age', 1, 6));
         expect(token.getType()).toBe(ETokenType.ID);
         expect(token.getValue()).toBe('age');
 
@@ -293,7 +293,7 @@ describe('Tokenizer tests', () => {
         expect(token.getType()).toBe(ETokenType.SEMICOLON);
 
         token = tokenizer.getNextToken();
-        expect(token).toEqual(new IdToken('count'));
+        expect(token).toEqual(new IdToken('count', 1, 19));
         expect(token.getType()).toBe(ETokenType.ID);
         expect(token.getValue()).toBe('count');
 
