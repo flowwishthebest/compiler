@@ -53,11 +53,8 @@ export class Parser {
         return ast;
     }
 
-    private _expr(): AST { // term ((PLUS | MINUS) term)*
-        // if (!this._currentToken) {
-        //     this._setNext();
-        // }
-
+    private _expr(): AST {
+        /* term ((PLUS | MINUS) term)* */
         let node = this._term();
 
         while (
@@ -143,7 +140,7 @@ export class Parser {
         // this._setNext(); // setup token
         this._eat(ETokenType.PROGRAM); // remove programm kw
         const varNode = this._variable();
-        const progName = varNode.getToken().getValue();
+        const progName = varNode.getToken();
 
         this._eat(ETokenType.SEMICOLON); // remove ;
 

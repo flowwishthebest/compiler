@@ -12,22 +12,26 @@ import {
 import { ProgramAST } from "./ast/program.ast";
 import { BlockAST } from "./ast/block.ast";
 import { IntegerDivToken } from "./tokens/integer-div.token";
+import { CallStack, ActivationRecord, EActiveRecordType } from './stack';
+
+interface Options {
+    shouldLogStack: boolean;
+}
 
 export class Interpreter extends ASTVisitor {
-    private readonly GLOABAL_SCOPE: Map<string, any>;
+    private readonly CALL_STACK: CallStack;
 
-    constructor(private readonly _tree: AST) {
+    constructor(
+        private readonly _tree: AST,
+        private readonly _options: Options = { shouldLogStack: true }
+    ) {
         super();
 
-        this.GLOABAL_SCOPE = new Map();
+        this.CALL_STACK = new CallStack();
     }
 
     public interpret(): void {
         return this.visit(this._tree);
-    }
-
-    public getGlobalScope(): Map<string, any> {
-        return this.GLOABAL_SCOPE;
     }
 
     public visitBinOpAST(node: BinOpAST): number {
@@ -74,12 +78,19 @@ export class Interpreter extends ASTVisitor {
     public visitAssignAST(node: AssignAST): void {
         const variableName = node.getLeft().getToken().getValue();
         const variableValue = this.visit(node.getRight());
-        this.GLOABAL_SCOPE.set(variableName, variableValue);
+
+        const activationRecord = this.CALL_STACK.peek() as ActivationRecord;
+
+        activationRecord.set(variableName, variableValue);
     }
 
     public visitVariableAST(node: VariableAST): number {
         const variableName = node.getToken().getValue();
-        const value = this.GLOABAL_SCOPE.get(variableName);
+
+        const activationRecord = this.CALL_STACK.peek() as ActivationRecord;
+
+        const value = activationRecord.get<number>(variableName);
+
         return value;
     }
 
@@ -92,7 +103,22 @@ export class Interpreter extends ASTVisitor {
     }
 
     public visitProgramAST(node: ProgramAST): void {
+        const programName = node.getToken().getValue();
+        this._log(`Enter: Program ${programName}`);
+        const activationRecord = new ActivationRecord({
+            name: programName,
+            type: EActiveRecordType.PROGRAM,
+            nestingLevel: 1
+        });
+
+        this.CALL_STACK.push(activationRecord);
+
         this.visit(node.getBlock());
+
+        this._log(`Leave: Program ${programName}`);
+        this.CALL_STACK.print();
+
+        this.CALL_STACK.pop();
     }
 
     public visitBlockAST(node: BlockAST): void {
@@ -119,6 +145,12 @@ export class Interpreter extends ASTVisitor {
 
     public visitProcedureCallAST(/* node: ProcedureCallAST */): void {
         return;
+    }
+
+    private _log(msg: string): void {
+        if (this._options.shouldLogStack) {
+            console.log(msg);
+        }
     }
     
 }

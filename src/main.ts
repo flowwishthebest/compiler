@@ -7,7 +7,7 @@ import * as Utils from 'util';
 (function main(): any {
     const text = `
         program Main;
-
+        var x, y: integer;
         procedure Alpha(a: integer; b: integer);
             var x: integer;
         {
@@ -15,7 +15,8 @@ import * as Utils from 'util';
         };
     
         { // main
-            Alpha(3 + 5, 7); // procedure call
+            y := 7;
+            x := (y + 3) * 3;
         } // main end.
     `;
 
@@ -28,6 +29,5 @@ import * as Utils from 'util';
     const interpreter = new Interpreter(tree);
     interpreter.interpret();
     
-    console.log(Utils.inspect(tree, { depth: null }));
-    console.log(interpreter.getGlobalScope());
+    // console.log(Utils.inspect(tree, { depth: null }));
 })();
