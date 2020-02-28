@@ -35,7 +35,7 @@ describe('Semantic analyzer tests', () => {
         try {
             symbolTableBuilder.visit(ast);
         } catch (err) {
-            const expectMsg = 'Id not found -> IdToken(ID, a, position=3:24)';
+            const expectMsg = 'Identifier not found -> IdToken(ID, a, position=3:24)';
             expect(err).toBeDefined();
             expect(err).toBeInstanceOf(Error);
             expect(err.message).toBe(expectMsg);

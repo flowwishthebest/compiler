@@ -165,6 +165,10 @@ export class Tokenizer {
         return new EOFToken();
     }
 
+    public getCurrentChar(): string {
+        return this._currentChar;
+    }
+
     private _number(): IntegerConstToken | FloatConstToken {
         const num = [];
 

@@ -1,12 +1,17 @@
 import { FloatDivToken, MinusToken, MulToken, PlusToken } from "./tokens";
 import { ASTVisitor } from "./ast-visitor";
-import { UnaryOpAST, NumberAST, BinOpAST, EmptyAST, CompoundAST, AssignAST, VariableAST, AST } from "./ast";
+import {
+    UnaryOpAST,
+    NumberAST,
+    BinOpAST,
+    CompoundAST,
+    AssignAST,
+    VariableAST,
+    AST,
+} from "./ast";
 import { ProgramAST } from "./ast/program.ast";
 import { BlockAST } from "./ast/block.ast";
-import { VariableDeclarationAST } from "./ast/variable-declaration.ast";
-import { TypeAST } from "./ast/type.ast";
 import { IntegerDivToken } from "./tokens/integer-div.token";
-import { ProcedureDeclarationAST } from "./ast/procedure-declaration.ast";
 
 export class Interpreter extends ASTVisitor {
     private readonly GLOABAL_SCOPE: Map<string, any>;
@@ -82,8 +87,7 @@ export class Interpreter extends ASTVisitor {
         node.getChildren().forEach((c) => this.visit(c));
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public visitEmptyAST(node: EmptyAST): void {
+    public visitEmptyAST(/* node: EmptyAST */): void {
         return;
     }
 
@@ -96,21 +100,25 @@ export class Interpreter extends ASTVisitor {
         this.visit(node.getCompoundStatement());
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public visitVariableDeclarationAST(node: VariableDeclarationAST): void {
+    public visitVariableDeclarationAST(
+        /* node: VariableDeclarationAST */
+    ): void {
         // TODO:
         return;
     }
     
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public visitTypeAST(node: TypeAST): void {
-        // TODO:
+    public visitTypeAST(/* node: TypeAST */): void {
         return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public visitProcedureDeclarationAST(node: ProcedureDeclarationAST): void {
-        // TODO:
+    public visitProcedureDeclarationAST(
+        /* node: ProcedureDeclarationAST, */
+    ): void {
         return;
     }
+
+    public visitProcedureCallAST(/* node: ProcedureCallAST */): void {
+        return;
+    }
+    
 }
