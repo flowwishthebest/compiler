@@ -15,6 +15,7 @@ import {
 import { EErrorType } from "./types/error.type";
 import { SemanticAnalyzerError } from "./errors/semantic-analyzer.error";
 import { Token } from "./tokens/token";
+import { ProcedureCallAST } from "./ast/procedure-call.ast";
 
 interface KwArgs {
     shouldLogScope?: boolean;
@@ -22,10 +23,13 @@ interface KwArgs {
 }
 
 const DUPLICATE_ID_MESSAGE = (token: Token): string =>
-    `Duplicate ID found -> ${token.toString()}`;
+    `${EErrorType.DUPLICATE_ID} -> ${token.toString()}`;
 
 const ID_NOT_FOUND_MESSAGE = (token: Token): string =>
-    `Id not found -> ${token.toString()}`;
+    `${EErrorType.ID_NOT_FOUND} -> ${token.toString()}`;
+
+const WRONG_NUMS_ARGS_MESSAGE = (token: Token): string =>
+    `${EErrorType.WRONG_NUMEBER_OF_ARGS} -> ${token.toString()}`;
 
 export class SemanticAnalyzer extends ASTVisitor {
     private _scope: ScopedSymbolTable;
@@ -173,6 +177,22 @@ export class SemanticAnalyzer extends ASTVisitor {
         this._log(`Leave scope: <${this._scope.getScopeName()}>`);
 
         this._scope = this._scope.getEnclosingScope();
+    }
+
+    public visitProcedureCallAST(node: ProcedureCallAST): void {
+        const proc = this._scope.lookup(node.getProcedureName()) as ProcedureSymbol;
+
+        const declaredParams = proc.getParams();
+        const callParams = proc.getParams();
+
+        if (declaredParams.length !== callParams.length) {
+            this._throw(
+                WRONG_NUMS_ARGS_MESSAGE(node.getToken()),
+                EErrorType.WRONG_NUMEBER_OF_ARGS,
+                node.getToken(),
+            );
+        }
+        node.getParams().forEach((p) => this.visit(p));
     }
 
     private _throw(msg: string, errType: EErrorType, token: Token): never {

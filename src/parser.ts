@@ -31,9 +31,12 @@ import { ParametersAST } from './ast/parameters.ast';
 import { ParserError } from './errors/parser.error';
 import { EErrorType } from './types/error.type';
 import { ETokenType } from './types';
+import { ProcedureCallAST } from './ast/procedure-call.ast';
 
 const UNEXPECTED_TOKEN_MESSAGE = (token: Token): string =>
     `Unexpected token met -> ${token.toString()}`;
+
+type Statement = CompoundAST | AssignAST | EmptyAST | ProcedureCallAST;
 
 export class Parser {
     private _currentToken: Token;
@@ -188,20 +191,24 @@ export class Parser {
         return results;
     }
 
-    private _statement(): CompoundAST | AssignAST | EmptyAST {
-        // statement : compound_statement | assignment_statement | empty
+    private _statement(): Statement {
+        // statement : compound | assign | call | empty
 
-        switch (this._currentToken.constructor) {
-            case LBracketToken: {
-                return this._compoundStatement();
-            }
-            case IdToken: {
-                return this._assignmentStatement();
-            }
-            default: {
-                return this._empty();
-            }
+        if (this._currentToken.getType() === ETokenType.LBRACKET) {
+            return this._compoundStatement();
         }
+
+        if (this._currentToken.getType() === ETokenType.ID
+            && this._tokenizer.getCurrentChar() === '('
+        ) {
+            return this._procedureCallStatement();
+        }
+
+        if (this._currentToken.getType() === ETokenType.ID) {
+            return this._assignmentStatement();
+        }
+
+        return this._empty();
     }
 
     private _assignmentStatement(): AssignAST {
@@ -400,6 +407,35 @@ export class Parser {
         }
 
         return new TypeAST(token);
+    }
+
+    private _procedureCallStatement(): ProcedureCallAST {
+        /** proccall_statement : ID LPAREN (expr (COMMA expr)*)? RPAREN */
+
+        const token = this._currentToken;
+        const procedureName = token.getValue();
+
+        this._eat(ETokenType.ID);
+        this._eat(ETokenType.LPAREN);
+
+        const params = []
+        if (this._currentToken.getType() !== ETokenType.RPAREN) {
+            const node = this._expr();
+            params.push(node);
+        }
+
+        while (this._currentToken.getType() === ETokenType.COMMA) {
+            this._eat(ETokenType.COMMA);
+            const node = this._expr();
+            params.push(node);
+        }
+
+        this._eat(ETokenType.RPAREN);
+
+        const node = new ProcedureCallAST(procedureName, params, token);
+        // TODO: remove procedure name or token
+
+        return node
     }
 
     private _eat(type: ETokenType): void | never {
