@@ -19,6 +19,7 @@ export class Stack<T = any> {
 
 export enum EActiveRecordType {
     PROGRAM = 'PROGRAM',
+    PROCEDURE = 'PROCEDURE',
 }
 
 interface KwArgs {

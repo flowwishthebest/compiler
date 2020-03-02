@@ -13,6 +13,7 @@ import { ProgramAST } from "./ast/program.ast";
 import { BlockAST } from "./ast/block.ast";
 import { IntegerDivToken } from "./tokens/integer-div.token";
 import { CallStack, ActivationRecord, EActiveRecordType } from './stack';
+import { ProcedureCallAST } from "./ast/procedure-call.ast";
 
 interface Options {
     shouldLogStack: boolean;
@@ -143,8 +144,43 @@ export class Interpreter extends ASTVisitor {
         return;
     }
 
-    public visitProcedureCallAST(/* node: ProcedureCallAST */): void {
-        return;
+    public visitProcedureCallAST(node: ProcedureCallAST): void {
+        const procedureName = node.getProcedureName();
+
+        const ar = new ActivationRecord({
+            name: procedureName,
+            type: EActiveRecordType.PROCEDURE,
+            nestingLevel: 2,
+        });
+
+        const procedureSymbol = node.getProcedureSymbol();
+
+        const [formalPamars, actualParams] = [
+            procedureSymbol.getParams(),
+            node.getParams(),
+        ];
+
+        formalPamars.forEach((v, idx) => {
+            const name = v.getName();
+            const val = actualParams[idx];
+            const resutlValue = this.visit(val);
+
+            ar.set(name, resutlValue);
+        });
+
+        console.log('AR', JSON.stringify(ar));
+
+        this.CALL_STACK.push(ar);
+
+        this._log(`Enter: procedure ${procedureSymbol.getName()}`);
+        this.CALL_STACK.print();
+
+        this.visit(procedureSymbol.getBlock());
+
+        this.CALL_STACK.print();
+        this._log(`Leave: procedure ${procedureSymbol.getName()}`);
+
+        this.CALL_STACK.pop();
     }
 
     private _log(msg: string): void {

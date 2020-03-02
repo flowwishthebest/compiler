@@ -7,17 +7,21 @@ import * as Utils from 'util';
 (function main(): any {
     const text = `
         program Main;
-        var x, y: integer;
-        procedure Alpha(a: integer; b: integer);
-            var x: integer;
+
+        procedure Alpha(a : integer; b : integer);
+        var x : integer;
         {
             x := (a + b ) * 2;
         };
-    
-        { // main
-            y := 7;
-            x := (y + 3) * 3;
-        } // main end.
+        
+        { // { Main }
+        
+            Alpha(3 + 5, 7); 
+            {
+                //procedure call
+            }
+
+        } //  { Main }
     `;
 
     const lexer = new Tokenizer(text);
