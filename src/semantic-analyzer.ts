@@ -176,6 +176,8 @@ export class SemanticAnalyzer extends ASTVisitor {
 
         this._log(`Leave scope: <${this._scope.getScopeName()}>`);
 
+        procedureSymbol.setBlock(node.getBlock());
+
         this._scope = this._scope.getEnclosingScope();
     }
 
@@ -183,7 +185,7 @@ export class SemanticAnalyzer extends ASTVisitor {
         const proc = this._scope.lookup(node.getProcedureName()) as ProcedureSymbol;
 
         const declaredParams = proc.getParams();
-        const callParams = proc.getParams();
+        const callParams = node.getParams();
 
         if (declaredParams.length !== callParams.length) {
             this._throw(
@@ -193,6 +195,8 @@ export class SemanticAnalyzer extends ASTVisitor {
             );
         }
         node.getParams().forEach((p) => this.visit(p));
+
+        node.setProcedureSymbol(proc);
     }
 
     private _throw(msg: string, errType: EErrorType, token: Token): never {
