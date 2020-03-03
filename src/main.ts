@@ -14,14 +14,13 @@ import * as Utils from 'util';
             x := (a + b ) * 2;
         };
         
-        { // { Main }
-        
-            Alpha(3 + 5, 7); 
-            {
-                //procedure call
+        { // Main
+            if (1) {
+                Alpha(3 + 5, 7);
+            } else {
+                // not here
             }
-
-        } //  { Main }
+        } //  Main end
     `;
 
     const lexer = new Tokenizer(text);
@@ -32,6 +31,4 @@ import * as Utils from 'util';
 
     const interpreter = new Interpreter(tree);
     interpreter.interpret();
-    
-    // console.log(Utils.inspect(tree, { depth: null }));
 })();

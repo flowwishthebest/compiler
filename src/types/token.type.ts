@@ -21,4 +21,6 @@ export enum ETokenType {
     PROGRAM = 'PROGRAM',
     VAR = 'VAR',
     PROCEDURE = 'PROCEDURE',
+    IF = 'IF',
+    ELSE = 'ELSE',
 }

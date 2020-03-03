@@ -77,3 +77,16 @@ __@bnf__
   | 'unknown'
   | 'else'
   | 'if'
+
+
+-----
+
+LPAREN := "(" ;
+RPAREN := ")" ;
+
+IF_KW   := "if" ;
+ELSE_KW := "else" ;
+
+ifStatement := IF_KW LPAREN expression RPAREN statement (ELSE_KW statement)? ;
+
+statement := ifStatement ;

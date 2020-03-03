@@ -16,6 +16,7 @@ import { EErrorType } from "./types/error.type";
 import { SemanticAnalyzerError } from "./errors/semantic-analyzer.error";
 import { Token } from "./tokens/token";
 import { ProcedureCallAST } from "./ast/procedure-call.ast";
+import { IfAST } from "./ast/if.ast";
 
 interface KwArgs {
     shouldLogScope?: boolean;
@@ -182,6 +183,7 @@ export class SemanticAnalyzer extends ASTVisitor {
     }
 
     public visitProcedureCallAST(node: ProcedureCallAST): void {
+        console.log('VISITING PROC CALL', node);
         const proc = this._scope.lookup(node.getProcedureName()) as ProcedureSymbol;
 
         const declaredParams = proc.getParams();
@@ -195,8 +197,17 @@ export class SemanticAnalyzer extends ASTVisitor {
             );
         }
         node.getParams().forEach((p) => this.visit(p));
-
+        console.log('PROC SYMBOL', proc);
         node.setProcedureSymbol(proc);
+    }
+
+    public visitIfAST(node: IfAST): void {
+        this.visit(node.getCondition());
+        this.visit(node.getIfPart());
+        
+        if (node.getElsePart()) {
+            this.visit(node.getElsePart());
+        }
     }
 
     private _throw(msg: string, errType: EErrorType, token: Token): never {
