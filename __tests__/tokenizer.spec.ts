@@ -18,6 +18,8 @@ import {
     IntegerTypeToken,
 } from '../src/tokens';
 import { ProcedureToken } from '../src/tokens/procedure.token';
+import { IfToken } from '../src/tokens/if.token';
+import { ElseToken } from '../src/tokens/else.token';
 
 describe('Tokenizer tests', () => {
     test('Recognize simplest expression', () => {
@@ -414,5 +416,19 @@ describe('Tokenizer tests', () => {
         token = tokenizer.getNextToken();
         expect(token).toEqual(new EOFToken());
         expect(token.getType()).toBe(ETokenType.EOF);
+    });
+
+    test('can recognize if else tokens', () => {
+        const tokenizer = new Tokenizer(
+            `if else`,
+        );
+
+        let token = tokenizer.getNextToken();
+        expect(token).toEqual(new IfToken());
+        expect(token.getType()).toBe(ETokenType.IF);
+
+        token = tokenizer.getNextToken();
+        expect(token).toEqual(new ElseToken());
+        expect(token.getType()).toBe(ETokenType.ELSE);
     });
 });

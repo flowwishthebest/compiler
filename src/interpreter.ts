@@ -14,10 +14,13 @@ import { BlockAST } from "./ast/block.ast";
 import { IntegerDivToken } from "./tokens/integer-div.token";
 import { CallStack, ActivationRecord, EActiveRecordType } from './stack';
 import { ProcedureCallAST } from "./ast/procedure-call.ast";
+import { IfAST } from "./ast/if.ast";
 
 interface Options {
     shouldLogStack: boolean;
 }
+
+// "if"  "(" expr ")" statement ("else" statement)? ;
 
 export class Interpreter extends ASTVisitor {
     private readonly CALL_STACK: CallStack;
@@ -153,6 +156,8 @@ export class Interpreter extends ASTVisitor {
             nestingLevel: 2,
         });
 
+        console.log(node);
+
         const procedureSymbol = node.getProcedureSymbol();
 
         const [formalPamars, actualParams] = [
@@ -183,10 +188,28 @@ export class Interpreter extends ASTVisitor {
         this.CALL_STACK.pop();
     }
 
+    public visitIfAST(node: IfAST): void {
+        const cond = node.getCondition();
+        const condValue = this.visit(cond);
+
+        if (this._iftruthy(condValue)) {
+            this.visit(node.getIfPart());
+        } else if (node.getElsePart()) {
+            this.visit(node.getElsePart());
+        }
+
+        return null;
+        
+    }
+
     private _log(msg: string): void {
         if (this._options.shouldLogStack) {
             console.log(msg);
         }
+    }
+
+    private _iftruthy(val: any): boolean {
+        return !!val;
     }
     
 }

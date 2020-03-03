@@ -24,6 +24,8 @@ import { VarToken } from './tokens/var.token';
 import { ProgramToken } from './tokens/program.token';
 import { ProcedureToken } from './tokens/procedure.token';
 import { TokenizerError } from './errors/tokenizer.error';
+import { IfToken } from './tokens/if.token';
+import { ElseToken } from './tokens/else.token';
 
 function isDigit(char: string): boolean {
     return '0' <= char && char <= '9';
@@ -72,7 +74,9 @@ export class Tokenizer {
             .set('div', new IntegerDivToken())
             .set('var', new VarToken())
             .set('program', new ProgramToken())
-            .set('procedure', new ProcedureToken());
+            .set('procedure', new ProcedureToken())
+            .set('if', new IfToken())
+            .set('else', new ElseToken());
     }
 
     public getNextToken(): Token {

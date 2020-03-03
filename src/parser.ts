@@ -32,6 +32,7 @@ import { ParserError } from './errors/parser.error';
 import { EErrorType } from './types/error.type';
 import { ETokenType } from './types';
 import { ProcedureCallAST } from './ast/procedure-call.ast';
+import { IfAST } from './ast/if.ast';
 
 const UNEXPECTED_TOKEN_MESSAGE = (token: Token): string =>
     `Unexpected token met -> ${token.toString()}`;
@@ -189,7 +190,10 @@ export class Parser {
     }
 
     private _statement(): Statement {
-        // statement : compound | assign | call | empty
+        // statement : compound | if | assign | call | empty
+        if (this._currentToken.getType() === ETokenType.IF) {
+            return this._ifStatement();
+        }
 
         if (this._currentToken.getType() === ETokenType.LBRACKET) {
             return this._compoundStatement();
@@ -428,11 +432,30 @@ export class Parser {
         }
 
         this._eat(ETokenType.RPAREN);
+        this._eat(ETokenType.SEMICOLON);
 
         const node = new ProcedureCallAST(procedureName, params, token);
         // TODO: remove procedure name or token
 
         return node
+    }
+
+    private _ifStatement(): IfAST {
+        this._eat(ETokenType.IF);
+
+        const condition = this._expr();
+
+        this._eat(ETokenType.LBRACKET);
+        const ifPart = this._statement();
+        this._eat(ETokenType.RBRACKET);
+
+        let elsePart = null;
+        if (this._currentToken.getType() === ETokenType.ELSE) {
+            this._eat(ETokenType.ELSE);
+            elsePart = this._statement();
+        }
+
+        return new IfAST(condition, ifPart, elsePart);
     }
 
     private _eat(type: ETokenType): void | never {
