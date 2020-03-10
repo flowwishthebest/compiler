@@ -86,7 +86,10 @@ RPAREN := ")" ;
 
 IF_KW   := "if" ;
 ELSE_KW := "else" ;
+WHILE_KW := "while" ;
 
-ifStatement := IF_KW LPAREN expression RPAREN statement (ELSE_KW statement)? ;
+ifStmt := IF_KW LPAREN expression RPAREN statement (ELSE_KW statement)? ;
 
-statement := ifStatement ;
+whileStmt := WHILE_KW LPAREN expression RPAREN statement ;
+
+statement := ifStmt | whileStmt ;

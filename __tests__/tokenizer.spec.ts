@@ -20,6 +20,7 @@ import {
 import { ProcedureToken } from '../src/tokens/procedure.token';
 import { IfToken } from '../src/tokens/if.token';
 import { ElseToken } from '../src/tokens/else.token';
+import { WhileToken } from '../src/tokens/while.token';
 
 describe('Tokenizer tests', () => {
     test('Recognize simplest expression', () => {
@@ -430,5 +431,19 @@ describe('Tokenizer tests', () => {
         token = tokenizer.getNextToken();
         expect(token).toEqual(new ElseToken());
         expect(token.getType()).toBe(ETokenType.ELSE);
+    });
+
+    test('can recognize while token', () => {
+        const tokenizer = new Tokenizer(
+            `while`,
+        );
+
+        let token = tokenizer.getNextToken();
+        expect(token).toEqual(new WhileToken());
+        expect(token.getType()).toBe(ETokenType.WHILE);
+
+        token = tokenizer.getNextToken();
+        expect(token).toEqual(new EOFToken());
+        expect(token.getType()).toBe(ETokenType.EOF);
     });
 });

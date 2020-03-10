@@ -15,6 +15,7 @@ import { IntegerDivToken } from "./tokens/integer-div.token";
 import { CallStack, ActivationRecord, EActiveRecordType } from './stack';
 import { ProcedureCallAST } from "./ast/procedure-call.ast";
 import { IfAST } from "./ast/if.ast";
+import { WhileAST } from "./ast/while.ast";
 
 interface Options {
     shouldLogStack: boolean;
@@ -200,6 +201,12 @@ export class Interpreter extends ASTVisitor {
 
         return null;
         
+    }
+
+    public visitWhileAST(node: WhileAST): void {
+        while (this.visit(node.getCondition())) {
+            this.visit(node.getBlock());
+        }
     }
 
     private _log(msg: string): void {

@@ -33,6 +33,7 @@ import { EErrorType } from './types/error.type';
 import { ETokenType } from './types';
 import { ProcedureCallAST } from './ast/procedure-call.ast';
 import { IfAST } from './ast/if.ast';
+import { WhileAST } from './ast/while.ast';
 
 const UNEXPECTED_TOKEN_MESSAGE = (token: Token): string =>
     `Unexpected token met -> ${token.toString()}`;
@@ -98,6 +99,10 @@ export class Parser {
         if (token instanceof FloatConstToken) {
             this._eat(ETokenType.FLOAT_CONST);
             return new NumberAST(token);
+        }
+
+        if (token.getType() === ETokenType.ID) {
+            return this._variable();
         }
 
         if (token instanceof LParenToken) {
@@ -172,7 +177,7 @@ export class Parser {
 
     private _statementList(): Array<CompoundAST | AssignAST | EmptyAST> {
         // statement_list : statement | statement SEMI statement_list
-
+        debugger;
         const node = this._statement();
 
         const results = [node];
@@ -182,15 +187,15 @@ export class Parser {
             results.push(this._statement());
         }
 
-        if (this._currentToken.constructor === IdToken) {
-            throw new SyntaxError('Error statement list');
-        }
-
         return results;
     }
 
     private _statement(): Statement {
-        // statement : compound | if | assign | call | empty
+        // statement : compound | if | assign | call | empty | while
+        if (this._currentToken.getType() === ETokenType.WHILE) {
+            return this._whileStatement();
+        }
+
         if (this._currentToken.getType() === ETokenType.IF) {
             return this._ifStatement();
         }
@@ -458,6 +463,16 @@ export class Parser {
         return new IfAST(condition, ifPart, elsePart);
     }
 
+    private _whileStatement(): WhileAST {
+        this._eat(ETokenType.WHILE);
+
+        const condition = this._expr();
+
+        const block = this._block();
+
+        return new WhileAST(condition, block);
+    }
+
     private _eat(type: ETokenType): void | never {
         if (this._currentToken.getType() === type) {
             this._currentToken = this._tokenizer.getNextToken();
@@ -472,5 +487,29 @@ export class Parser {
 
     private _throw(msg: string, errType: EErrorType, token: Token): never {
         throw new ParserError(msg, errType, token);
+    }
+
+    private __expression__(): any {
+        return this.__equality__();
+    }
+
+    private __equality__(): any {
+        // quality := comparison ( ( "!=" | "==" ) comparison )* ;
+        let expr = this.__comparition__();
+
+        const op = this._currentToken;
+        while (
+            op.getType() === ETokenType.BANG_EQUAL ||
+            op.getType() === ETokenType.EQUAL_EQUAL
+        ) {
+            const right = this.__comparition__();
+            expr = new BinOpAST(expr, op, right);
+        }
+
+        return expr;
+    }
+
+    private __comparition__(): any {
+        return ;
     }
 }
