@@ -7,18 +7,19 @@ import * as Utils from 'util';
 (function main(): any {
     const text = `
         program Main;
-
+        var z: integer;
         procedure Alpha(a : integer; b : integer);
-        var x : integer;
+            var x: integer;
         {
             x := (a + b ) * 2;
         };
         
         { // Main
-            if (1) {
+            z := 3;
+            while (z) {
                 Alpha(3 + 5, 7);
-            } else {
-                // not here
+
+                z := z - 1;
             }
         } //  Main end
     `;

@@ -6,6 +6,9 @@
   "directories": {
     "doc": "docs"
   },
+  "bin": {
+    "ilya": "./bin/main.js"
+  },
   "scripts": {
     "test": "jest -c ./jest.config.json",
     "coverage": "cat ./coverage/lcov.info | coveralls",
@@ -27,6 +30,7 @@
   "devDependencies": {
     "@types/jest": "24.0.19",
     "@types/node": "13.7.1",
+    "@types/yargs": "^15.0.4",
     "@typescript-eslint/eslint-plugin": "2.19.2",
     "@typescript-eslint/parser": "2.19.2",
     "coveralls": "3.0.7",
@@ -38,5 +42,7 @@
     "ts-jest": "24.1.0",
     "typescript": "3.6.4"
   },
-  "dependencies": {}
+  "dependencies": {
+    "yargs": "^15.1.0"
+  }
 }

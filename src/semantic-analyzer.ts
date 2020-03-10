@@ -17,6 +17,7 @@ import { SemanticAnalyzerError } from "./errors/semantic-analyzer.error";
 import { Token } from "./tokens/token";
 import { ProcedureCallAST } from "./ast/procedure-call.ast";
 import { IfAST } from "./ast/if.ast";
+import { WhileAST } from "./ast/while.ast";
 
 interface KwArgs {
     shouldLogScope?: boolean;
@@ -208,6 +209,11 @@ export class SemanticAnalyzer extends ASTVisitor {
         if (node.getElsePart()) {
             this.visit(node.getElsePart());
         }
+    }
+
+    public visitWhileAST(node: WhileAST): void {
+        this.visit(node.getCondition());
+        this.visit(node.getBlock());
     }
 
     private _throw(msg: string, errType: EErrorType, token: Token): never {
