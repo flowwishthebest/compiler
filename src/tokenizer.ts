@@ -40,6 +40,7 @@ import { LessEqualToken } from './tokens/less-equal.token';
 import { LessToken } from './tokens/less.token';
 import { GreaterEqualToken } from './tokens/greater-equal.token';
 import { GreaterToken } from './tokens/greater.token';
+import { PrintToken } from './tokens/print.token';
 
 function isDigit(char: string): boolean {
     return '0' <= char && char <= '9';
@@ -105,6 +106,7 @@ export class Tokenizer {
         keywords.set('nil', new NilToken());
         keywords.set('false', new FalseToken());
         keywords.set('true', new TrueToken());
+        keywords.set('print', new PrintToken());
 
         this._keywords = keywords;
     }

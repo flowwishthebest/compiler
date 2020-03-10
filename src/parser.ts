@@ -488,4 +488,28 @@ export class Parser {
     private _throw(msg: string, errType: EErrorType, token: Token): never {
         throw new ParserError(msg, errType, token);
     }
+
+    private __expression__(): any {
+        return this.__equality__();
+    }
+
+    private __equality__(): any {
+        // quality := comparison ( ( "!=" | "==" ) comparison )* ;
+        let expr = this.__comparition__();
+
+        const op = this._currentToken;
+        while (
+            op.getType() === ETokenType.BANG_EQUAL ||
+            op.getType() === ETokenType.EQUAL_EQUAL
+        ) {
+            const right = this.__comparition__();
+            expr = new BinOpAST(expr, op, right);
+        }
+
+        return expr;
+    }
+
+    private __comparition__(): any {
+        return ;
+    }
 }

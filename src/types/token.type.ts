@@ -37,4 +37,5 @@ export enum ETokenType {
     GREATER = 'GREATER',
     LESS_EQUAL = 'LESS_EQUAL',
     GREATER_EQUAL = 'GREATER_EQUAL',
+    PRINT = 'PRINT',
 }
