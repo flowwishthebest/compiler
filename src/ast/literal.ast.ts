@@ -1,16 +1,16 @@
 import { AST } from "./ast";
 import { Token } from "../tokens/token";
 
-export class VariableAST extends AST {
+export class LiteralAST<T = any> extends AST {
     constructor(private readonly _token: Token) {
         super();
     }
 
-    public getToken(): Token {
-        return this._token;
+    public getType(): string {
+        return this._token.getType();
     }
 
-    public getName(): string {
+    public getValue(): T {
         return this._token.getValue();
     }
 }

@@ -85,7 +85,7 @@ export class SemanticAnalyzer extends ASTVisitor {
     }
 
     public visitUnaryOpAST(node: UnaryOpAST): void {
-        this.visit(node.getExpr());
+        this.visit(node.getRight());
     }
 
     public visitCompoundAST(node: CompoundAST): void {
