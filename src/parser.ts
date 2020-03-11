@@ -7,7 +7,6 @@ import { Token } from './tokens/token';
 import { LParenToken } from './tokens/lparen.token';
 import { VariableAST } from './ast/var.ast';
 import { UnaryOpAST } from './ast/unary-op.ast';
-import { LBracketToken } from './tokens/lbracket.token';
 import { IdToken } from './tokens/id.token';
 import { SemicolonToken } from './tokens/semicolon.token';
 import { AssignAST } from './ast/assign.ast';
@@ -177,7 +176,6 @@ export class Parser {
 
     private _statementList(): Array<CompoundAST | AssignAST | EmptyAST> {
         // statement_list : statement | statement SEMI statement_list
-        debugger;
         const node = this._statement();
 
         const results = [node];
@@ -487,125 +485,5 @@ export class Parser {
 
     private _throw(msg: string, errType: EErrorType, token: Token): never {
         throw new ParserError(msg, errType, token);
-    }
-
-    private __expression__(): any {
-        return this.__equality__();
-    }
-
-    private __equality__(): any {
-        // quality := comparison ( ( "!=" | "==" ) comparison )* ;
-        let expr = this.__comparition__();
-
-        const op = this._currentToken;
-        while (
-            op.getType() === ETokenType.BANG_EQUAL ||
-            op.getType() === ETokenType.EQUAL_EQUAL
-        ) {
-            const right = this.__comparition__();
-            expr = new BinOpAST(expr, op, right);
-        }
-
-        return expr;
-    }
-
-    private __comparition__(): any {
-        let expr = this.__addition__();
-
-        const op = this._currentToken;
-
-        while (op.getType() === ETokenType.GREATER ||
-            op.getType() === ETokenType.GREATER_EQUAL ||
-            op.getType() === ETokenType.LESS ||
-            op.getType() === ETokenType.LESS_EQUAL
-        ) {
-            const right = this.__addition__();
-
-            expr = new BinOpAST(expr, op, right);
-        }
-
-        return expr;
-    }
-
-    private __addition__(): any {
-        let expr = this.__multiplication__();
-
-        const op = this._currentToken;
-
-        while (
-            op.getType() === ETokenType.MINUS ||
-            op.getType() === ETokenType.PLUS
-        ) {
-            const right = this.__multiplication__();
-
-            expr = new BinOpAST(expr, op, right);
-        }
-
-        return expr;
-    }
-
-    private __multiplication__(): any {
-        let expr = this.__unary__();
-
-        const op = this._currentToken;
-
-        while (op.getType() === ETokenType.FLOAT_DIV ||
-            op .getType() === ETokenType.MUL
-        ) {
-            const right = this.__unary__();
-
-            expr = new BinOpAST(expr, op, right);
-        }
-
-        return expr;
-    }
-
-    private __unary__(): any {
-        if (this._currentToken.getType() === ETokenType.BANG ||
-            this._currentToken.getType() === ETokenType.MINUS
-        ) {
-            const op = this._currentToken;
-
-            const right = this.__unary__();
-
-            return new UnaryOpAST(op, right);
-        }
-
-        return this.__primary__();
-    }
-
-    private __primary__(): any {
-        switch (this._currentToken.getType()) {
-            case ETokenType.TRUE:
-            case ETokenType.FALSE:
-            case ETokenType.NIL: {
-                return new LiteralAST(this._currentToken);
-            }
-
-            case ETokenType.INTEGER_CONST:
-            case ETokenType.FLOAT_CONST: {
-                return new LiteralAST(this._currentToken);
-            }
-        }
-    }
-
-    private __match__(...types: Array<string>): boolean {
-        for (const t of types) {
-            if (this.__check__(t)) {
-
-            }
-        }
-    }
-
-    private __advance__(): void {
-        this._currentToken = this._tokenizer.getNextToken();
-    }
-
-    private __peek__(): Token {
-        return this._currentToken;
-    }
-
-    private __check__(type: string): boolean {
-        return this.__peek__().getType() === type;
     }
 }
