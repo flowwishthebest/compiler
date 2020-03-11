@@ -6,8 +6,14 @@ import { ETokenType } from './types/token.type';
 import { UnaryOpAST } from './ast/unary-op.ast';
 import { LiteralAST } from './ast/literal.ast';
 import { BinOpAST } from './ast/bin-op.ast';
+import { VariableAST } from './ast';
+import { PrintAST } from './ast/print.ast';
+import { ExpressionAST } from './ast/expression.ast';
+import { ProgAST
+ } from './ast/prog.ast';
 
-type UnaryExp = UnaryOpAST | LiteralAST;
+type UnaryExp = UnaryOpAST | LiteralAST | PrimaryExp;
+type PrimaryExp = LiteralAST | VariableAST;
 
 export class AnotherParser {
     private readonly UNEXPECTED_TOKEN_MESSAGE = (token: Token): string =>
@@ -19,8 +25,46 @@ export class AnotherParser {
         this._token = _scanner.getNextToken();
     }
 
-    public parse(): any { // TODO: type
-        return this._expression();
+    public parse(): ProgAST { // TODO: type
+        return this._program();
+    }
+
+    private _program(): ProgAST {
+        const progAST = new ProgAST();
+
+        const statements = progAST.getStatements();
+
+        while (this._peek().getType() !== ETokenType.EOF) {
+            statements.push(this._statement());
+        }
+
+        return progAST;
+    }
+
+    private _statement(): PrintAST {
+        const currentToken = this._peek();
+
+        switch (currentToken.getType()) {
+            case ETokenType.PRINT: {
+                this._advance(ETokenType.PRINT);
+                return this._print();
+            }
+            default: {
+                return this._expressionStmt();
+            }
+        }
+    }
+
+    private _print(): PrintAST {
+        const expr = this._expression();
+        this._advance(ETokenType.SEMICOLON);
+        return new PrintAST(expr);
+    }
+
+    private _expressionStmt(): any {
+        const expression = this._expression();
+        this._advance(ETokenType.SEMICOLON);
+        return new ExpressionAST(expression);
     }
 
     private _expression(): any { // TODO: type
@@ -115,7 +159,7 @@ export class AnotherParser {
         return expr;
     }
 
-    private _multiplication(): UnaryExp | BinOpAST { // TODO: type
+    private _multiplication(): UnaryExp | BinOpAST  { // TODO: type
         let expr: UnaryExp | BinOpAST = this._unary();
 
         while (this._peek().getType() === ETokenType.FLOAT_DIV ||
@@ -131,7 +175,7 @@ export class AnotherParser {
                 }
                 case ETokenType.MUL: {
                     this._advance(ETokenType.MUL);
-                    return;
+                    break;
                 }
                 case ETokenType.INTEGER_DIV: {
                     this._advance(ETokenType.INTEGER_DIV);
@@ -173,7 +217,7 @@ export class AnotherParser {
     }
 
     /* primary := NUMBER | "false" | "true" | "nil" | "(" expression ")" ; */
-    private _primary(): LiteralAST { // TODO: type for expression
+    private _primary(): PrimaryExp { // TODO: type for expression
         const currentToken = this._peek();
 
         switch (currentToken.getType()) {
@@ -202,6 +246,10 @@ export class AnotherParser {
                 const expr = this._expression();
                 this._advance(ETokenType.RPAREN);
                 return expr;
+            }
+            case ETokenType.ID: {
+                this._advance(ETokenType.ID);
+                return new VariableAST(currentToken);
             }
         }
     }

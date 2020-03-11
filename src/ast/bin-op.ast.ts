@@ -11,7 +11,7 @@ export class BinOpAST extends AST {
         super();
     }
 
-    public getToken(): Token {
+    public getOperator(): Token {
         return this._op;
     }
 

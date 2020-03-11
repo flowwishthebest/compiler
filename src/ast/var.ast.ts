@@ -9,4 +9,8 @@ export class VariableAST extends AST {
     public getToken(): Token {
         return this._token;
     }
+
+    public getName(): string {
+        return this._token.getValue();
+    }
 }

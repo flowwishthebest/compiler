@@ -4,17 +4,17 @@ import { Token } from "../tokens/token";
 export class UnaryOpAST extends AST {
 
     constructor(
-        private readonly _token: Token,
-        private readonly _expr: AST,
+        private readonly _operator: Token,
+        private readonly _right: AST,
     ) {
         super();
     }
 
-    public getToken(): Token {
-        return this._token;
+    public getOperator(): Token {
+        return this._operator;
     }
 
-    public getExpr(): AST {
-        return this._expr;
+    public getRight(): AST {
+        return this._right;
     }
 }

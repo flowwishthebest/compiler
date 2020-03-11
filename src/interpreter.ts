@@ -1,4 +1,3 @@
-import { FloatDivToken, MinusToken, MulToken, PlusToken } from "./tokens";
 import { ASTVisitor } from "./ast-visitor";
 import {
     UnaryOpAST,
@@ -11,18 +10,21 @@ import {
 } from "./ast";
 import { ProgramAST } from "./ast/program.ast";
 import { BlockAST } from "./ast/block.ast";
-import { IntegerDivToken } from "./tokens/integer-div.token";
 import { CallStack, ActivationRecord, EActiveRecordType } from './stack';
 import { ProcedureCallAST } from "./ast/procedure-call.ast";
 import { IfAST } from "./ast/if.ast";
 import { WhileAST } from "./ast/while.ast";
+import { ETokenType } from "./types";
+import { LiteralAST } from "./ast/literal.ast";
+import { ProgAST } from "./ast/prog.ast";
+import { PrintAST } from "./ast/print.ast";
+import { ExpressionAST } from "./ast/expression.ast";
 
 interface Options {
     shouldLogStack: boolean;
 }
 
-// "if"  "(" expr ")" statement ("else" statement)? ;
-
+// TODO: runtime errors
 export class Interpreter extends ASTVisitor {
     private readonly CALL_STACK: CallStack;
 
@@ -36,52 +38,100 @@ export class Interpreter extends ASTVisitor {
     }
 
     public interpret(): void {
-        return this.visit(this._tree);
+        try {
+            this.visit(this._tree);
+        } catch (err) {
+            console.log('RUNTIME ERROR', err);
+        }
     }
 
-    public visitBinOpAST(node: BinOpAST): number {
-        switch (node.getToken().constructor) {
-            case PlusToken: {
-                return this.visit(node.getLeft()) + this.visit(node.getRight());
+    public visitProgAST(node: ProgAST): void {
+        for (const stmt of node.getStatements()) {
+            this.visit(stmt);
+        }
+    }
+
+    public visitPrintAST(node: PrintAST): void {
+        const expression = this.visit(node.getExpression());
+
+        console.log(JSON.stringify(expression));
+    }
+
+    public visitExpressionAST(node: ExpressionAST): void {
+        this.visit(node.getExpression());
+    }
+
+    public visitBinOpAST(node: BinOpAST): number | boolean {
+        const left = node.getLeft();
+        const right = node.getRight();
+        const operator = node.getOperator();
+
+        switch (operator.getType()) {
+            case ETokenType.PLUS: {
+                return this.visit(left) + this.visit(right);
             }
-            case MinusToken: {
-                return this.visit(node.getLeft()) - this.visit(node.getRight());
+            case ETokenType.MINUS: {
+                return this.visit(left) - this.visit(right);
             }
-            case MulToken: {
-                return this.visit(node.getLeft()) * this.visit(node.getRight());
+            case ETokenType.MUL: {
+                return this.visit(left) * this.visit(right);
             }
-            case FloatDivToken: {
-                return this.visit(node.getLeft()) / this.visit(node.getRight());
+            case ETokenType.FLOAT_DIV: {
+                return this.visit(left) / this.visit(right);
             }
-            case IntegerDivToken: {
-                const result = this.visit(node.getLeft()) / this.visit(node.getRight());
-                return Math.trunc(result);
+            case ETokenType.INTEGER_DIV: {
+                return Math.trunc(this.visit(left) / this.visit(right));
+            }
+            case ETokenType.GREATER: {
+                return this.visit(left) > this.visit(right);
+            }
+            case ETokenType.GREATER_EQUAL: {
+                return this.visit(left) >= this.visit(right);
+            }
+            case ETokenType.LESS: {
+                return this.visit(left) < this.visit(right);
+            }
+            case ETokenType.LESS_EQUAL: {
+                return this.visit(left) <= this.visit(right);
+            }
+            case ETokenType.EQUAL_EQUAL: {
+                return this.visit(left) == this.visit(right);
+            }
+            case ETokenType.BANG_EQUAL: {
+                return this.visit(left) != this.visit(right);
             }
             default: {
-                throw new Error(
-                    `Unknown op name ${node.getToken().constructor.name}`,
-                );
+                throw new Error(`Unknown op name ${operator.getType()}`);
             }
         }
+    }
+
+    public visitUnaryOpAST(node: UnaryOpAST): number | boolean {
+        const right = node.getRight();
+
+        switch (node.getOperator().getType()) {
+            case ETokenType.BANG: {
+                return !this._iftruthy(right);
+            }
+            case ETokenType.PLUS: {
+                return +this.visit(right);
+            }
+            case ETokenType.MINUS: {
+                return -this.visit(right);
+            }
+        }
+    }
+    
+    public visitLiteralAST(node: LiteralAST): any {
+        return node.getValue();
     }
 
     public visitNumberAST(node: NumberAST): number {
         return node.getToken().getValue();
     }
 
-    public visitUnaryOpAST(node: UnaryOpAST): number {
-        switch (node.getToken().constructor) {
-            case PlusToken: {
-                return +this.visit(node.getExpr());
-            }
-            case MinusToken: {
-                return -this.visit(node.getExpr());
-            }
-        }
-    }
-
     public visitAssignAST(node: AssignAST): void {
-        const variableName = node.getLeft().getToken().getValue();
+        const variableName = node.getLeft().getName();
         const variableValue = this.visit(node.getRight());
 
         const activationRecord = this.CALL_STACK.peek() as ActivationRecord;
@@ -90,7 +140,7 @@ export class Interpreter extends ASTVisitor {
     }
 
     public visitVariableAST(node: VariableAST): number {
-        const variableName = node.getToken().getValue();
+        const variableName = node.getName();
 
         const activationRecord = this.CALL_STACK.peek() as ActivationRecord;
 

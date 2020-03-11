@@ -10,6 +10,7 @@ export class ASTVisitor {
 
 
     public genericVisit(node: AST): never {
+        console.log('GOT NODE', node);
         throw new Error(`No visit{${node.constructor.name}} method`);
     }
 }
