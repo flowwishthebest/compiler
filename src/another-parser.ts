@@ -11,6 +11,7 @@ import { PrintAST } from './ast/print.ast';
 import { ExpressionAST } from './ast/expression.ast';
 import { ProgAST
  } from './ast/prog.ast';
+ import { VarDeclAST } from './ast/var-decl.ast';
 
 type UnaryExp = UnaryOpAST | LiteralAST | PrimaryExp;
 type PrimaryExp = LiteralAST | VariableAST;
@@ -35,10 +36,41 @@ export class AnotherParser {
         const statements = progAST.getStatements();
 
         while (this._peek().getType() !== ETokenType.EOF) {
-            statements.push(this._statement());
+            statements.push(this._declaration());
         }
 
         return progAST;
+    }
+
+    private _declaration(): any {
+        // TODO: sync
+        const currentToken = this._peek();
+
+        switch (currentToken.getType()) {
+            case ETokenType.VAR: {
+                this._advance(ETokenType.VAR);
+                return this._varDecl();
+            }
+            default: {
+                return this._statement();
+            }
+        }
+    }
+
+    private _varDecl(): any {
+        const varToken = this._peek();
+
+        this._advance(ETokenType.ID);
+
+        let initializer = null;
+        if (this._peek().getType() === ETokenType.ASSIGN) {
+            this._advance(ETokenType.ASSIGN);
+            initializer = this._expression();
+        }
+
+        this._advance(ETokenType.SEMICOLON);
+
+        return new VarDeclAST(varToken, initializer);
     }
 
     private _statement(): PrintAST {

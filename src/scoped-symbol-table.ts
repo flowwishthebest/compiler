@@ -112,6 +112,7 @@ export class ScopedSymbolTable {
     private _initBuiltins(): void {
         this.define(new BuiltinTypeSymbol('integer'));
         this.define(new BuiltinTypeSymbol('float'));
+        this.define(new BuiltinTypeSymbol('any'));
     }
 
     private _log(msg: string): void {

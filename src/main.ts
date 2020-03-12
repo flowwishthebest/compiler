@@ -36,9 +36,27 @@ import { AnotherParser } from './another-parser';
 // })();
 
 
-(function asd(): any {
+// (function asd(): any {
+//     const text = `
+//         print((1+2)>-10);print(23+432);
+//     `;
+
+//     const scanner = new Tokenizer(text);
+
+//     const parser = new AnotherParser(scanner);
+
+//     const tree = parser.parse();
+//     console.log(JSON.stringify(tree));
+
+//     const interpreter = new Interpreter(tree, { shouldLogStack: true });
+//     interpreter.interpret();
+// })();
+
+(function asdsd(): any {
     const text = `
-        print((1+2)>-10);print(23+432);
+        var a := 1;
+        var b := 2;
+        print a >= b;
     `;
 
     const scanner = new Tokenizer(text);
@@ -46,8 +64,9 @@ import { AnotherParser } from './another-parser';
     const parser = new AnotherParser(scanner);
 
     const tree = parser.parse();
-    console.log(JSON.stringify(tree));
 
-    const interpreter = new Interpreter(tree, { shouldLogStack: true });
-    interpreter.interpret();
+    // console.log(tree);
+
+    const interpreter = new Interpreter(tree);
+    interpreter.interpret(); 
 })();

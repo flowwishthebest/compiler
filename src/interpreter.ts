@@ -10,7 +10,6 @@ import {
 } from "./ast";
 import { ProgramAST } from "./ast/program.ast";
 import { BlockAST } from "./ast/block.ast";
-import { CallStack, ActivationRecord, EActiveRecordType } from './stack';
 import { ProcedureCallAST } from "./ast/procedure-call.ast";
 import { IfAST } from "./ast/if.ast";
 import { WhileAST } from "./ast/while.ast";
@@ -19,6 +18,9 @@ import { LiteralAST } from "./ast/literal.ast";
 import { ProgAST } from "./ast/prog.ast";
 import { PrintAST } from "./ast/print.ast";
 import { ExpressionAST } from "./ast/expression.ast";
+import { CallStack } from "./call-stack";
+import { ActivationRecord, EActiveRecordType } from "./activation-record";
+import { VarDeclAST } from "./ast/var-decl.ast";
 
 interface Options {
     shouldLogStack: boolean;
@@ -46,9 +48,23 @@ export class Interpreter extends ASTVisitor {
     }
 
     public visitProgAST(node: ProgAST): void {
+        this._log(`Enter: Program`);
+        
+        const activationRecord = new ActivationRecord({
+            name: 'global',
+            type: EActiveRecordType.PROGRAM,
+            nestingLevel: 1,
+        });
+
+        this.CALL_STACK.push(activationRecord);
+
         for (const stmt of node.getStatements()) {
             this.visit(stmt);
         }
+
+        this._log(`Leave: Program`);
+        this.CALL_STACK.print();
+        this.CALL_STACK.pop();
     }
 
     public visitPrintAST(node: PrintAST): void {
@@ -179,6 +195,15 @@ export class Interpreter extends ASTVisitor {
     public visitBlockAST(node: BlockAST): void {
         node.getDeclarations().forEach((d) => this.visit(d));
         this.visit(node.getCompoundStatement());
+    }
+
+    public visitVarDeclAST(node: VarDeclAST): void {
+        let value = null;
+        if (node.getInitializer()) {
+            value = this.visit(node.getInitializer());
+        }
+
+        this.CALL_STACK.peek().set(node.getName(), value);
     }
 
     public visitVariableDeclarationAST(
