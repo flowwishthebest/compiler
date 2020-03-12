@@ -18,6 +18,8 @@ import { Token } from "./tokens/token";
 import { ProcedureCallAST } from "./ast/procedure-call.ast";
 import { IfAST } from "./ast/if.ast";
 import { WhileAST } from "./ast/while.ast";
+import { VarDeclAST } from "./ast/var-decl.ast";
+import { ProgAST } from "./ast/prog.ast";
 
 interface KwArgs {
     shouldLogScope?: boolean;
@@ -74,6 +76,29 @@ export class SemanticAnalyzer extends ASTVisitor {
         this._scope = this._scope.getEnclosingScope();
     }
 
+    public visitProgAST(node: ProgAST): void {
+        const globalScope = new ScopedSymbolTable({
+            scopeName: 'glob',
+            scopeLevel: 1,
+            enclosingScope: this._scope,
+            initBuiltins: true,
+        });
+
+        this._scope = globalScope;
+
+        this._log(`Enter scope: <${this._scope.getScopeName()}>`);
+
+        for (const stmt of node.getStatements()) {
+            this.visit(stmt);
+        }
+
+        globalScope.print();
+
+        this._log(`Leave scope: <${this._scope.getScopeName()}>`);
+
+        this._scope = this._scope.getEnclosingScope();
+    }
+
     public visitBinOpAST(node: BinOpAST): void {
         this.visit(node.getLeft());
         this.visit(node.getRight());
@@ -102,7 +127,7 @@ export class SemanticAnalyzer extends ASTVisitor {
 
         const typeSymbol = this._scope.lookup(typeName);
 
-        const varName = node.getVariable().getToken().getValue();
+        const varName = node.getVariable().getName();
 
         const variableSymbol = new VariableSymbol(varName, typeSymbol);
 
@@ -111,6 +136,30 @@ export class SemanticAnalyzer extends ASTVisitor {
                 DUPLICATE_ID_MESSAGE(node.getVariable().getToken()),
                 EErrorType.DUPLICATE_ID,
                 node.getVariable().getToken(),
+            );
+        }
+
+        this._scope.define(variableSymbol);
+    }
+    
+    public visitVarDeclAST(node: VarDeclAST): void {
+        const typeName = 'any';
+
+        const typeSymbol = this._scope.lookup(typeName);
+
+        const varName = node.getName();
+
+        node.getInitializer() && this.visit(node.getInitializer());
+
+        const variableSymbol = new VariableSymbol(varName, typeSymbol);
+
+        if (this._scope.lookup(varName, { currentScopeOnly: true })) {
+            const token = node.getToken();
+
+            this._throw(
+                DUPLICATE_ID_MESSAGE(token),
+                EErrorType.DUPLICATE_ID,
+                token,
             );
         }
 
@@ -184,7 +233,6 @@ export class SemanticAnalyzer extends ASTVisitor {
     }
 
     public visitProcedureCallAST(node: ProcedureCallAST): void {
-        console.log('VISITING PROC CALL', node);
         const proc = this._scope.lookup(node.getProcedureName()) as ProcedureSymbol;
 
         const declaredParams = proc.getParams();
@@ -198,7 +246,6 @@ export class SemanticAnalyzer extends ASTVisitor {
             );
         }
         node.getParams().forEach((p) => this.visit(p));
-        console.log('PROC SYMBOL', proc);
         node.setProcedureSymbol(proc);
     }
 
