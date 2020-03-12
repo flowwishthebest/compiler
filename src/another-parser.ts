@@ -6,12 +6,13 @@ import { ETokenType } from './types/token.type';
 import { UnaryOpAST } from './ast/unary-op.ast';
 import { LiteralAST } from './ast/literal.ast';
 import { BinOpAST } from './ast/bin-op.ast';
-import { VariableAST } from './ast';
+import { VariableAST, AssignAST } from './ast';
 import { PrintAST } from './ast/print.ast';
 import { ExpressionAST } from './ast/expression.ast';
 import { ProgAST
  } from './ast/prog.ast';
- import { VarDeclAST } from './ast/var-decl.ast';
+import { BlockStmtAST } from './ast/block-stm.ast';
+import { VarDeclAST } from './ast/var-decl.ast';
 
 type UnaryExp = UnaryOpAST | LiteralAST | PrimaryExp;
 type PrimaryExp = LiteralAST | VariableAST;
@@ -73,7 +74,7 @@ export class AnotherParser {
         return new VarDeclAST(varToken, initializer);
     }
 
-    private _statement(): PrintAST {
+    private _statement(): PrintAST | BlockStmtAST {
         const currentToken = this._peek();
 
         switch (currentToken.getType()) {
@@ -81,10 +82,29 @@ export class AnotherParser {
                 this._advance(ETokenType.PRINT);
                 return this._print();
             }
+            case ETokenType.LBRACKET: {
+                this._advance(ETokenType.LBRACKET);
+                return this._block();
+            }
             default: {
                 return this._expressionStmt();
             }
         }
+    }
+
+    private _block(): BlockStmtAST {
+        const block = new BlockStmtAST()
+        const statements = block.getStatements();
+
+        while (this._peek().getType() !== ETokenType.RBRACKET
+            && !this._isAtEnd()
+        ) {
+            statements.push(this._declaration());
+        }
+
+        this._advance(ETokenType.RBRACKET);
+
+        return block;
     }
 
     private _print(): PrintAST {
@@ -100,7 +120,25 @@ export class AnotherParser {
     }
 
     private _expression(): any { // TODO: type
-        return this._equality();
+        return this._assignment();
+    }
+
+    private _assignment(): any {
+        const expr = this._equality();
+
+        if (this._peek().getType() === ETokenType.ASSIGN) {
+            const t = this._peek();
+            this._advance(ETokenType.ASSIGN);
+            const val = this._assignment();
+
+            if (expr instanceof VariableAST) {
+                return new AssignAST(expr, t , val);
+            }
+
+            throw new Error('Invalid assignment target.');
+        }
+
+        return expr;
     }
 
     private _equality(): BinOpAST | UnaryExp { // TODO: type
@@ -306,5 +344,9 @@ export class AnotherParser {
 
     private _throw(msg: string, errType: EErrorType, token: Token): never {
         throw new ParserError(msg, errType, token);
+    }
+
+    private _isAtEnd(): boolean {
+        return this._peek().getType() === ETokenType.EOF;
     }
 }

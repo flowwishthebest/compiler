@@ -21,6 +21,7 @@ import { ExpressionAST } from "./ast/expression.ast";
 import { CallStack } from "./call-stack";
 import { ActivationRecord, EActiveRecordType } from "./activation-record";
 import { VarDeclAST } from "./ast/var-decl.ast";
+import { BlockStmtAST } from "./ast/block-stm.ast";
 
 interface Options {
     shouldLogStack: boolean;
@@ -54,6 +55,7 @@ export class Interpreter extends ASTVisitor {
             name: 'global',
             type: EActiveRecordType.PROGRAM,
             nestingLevel: 1,
+            enclosingAR: null,
         });
 
         this.CALL_STACK.push(activationRecord);
@@ -63,7 +65,7 @@ export class Interpreter extends ASTVisitor {
         }
 
         this._log(`Leave: Program`);
-        this.CALL_STACK.print();
+        // this.CALL_STACK.print();
         this.CALL_STACK.pop();
     }
 
@@ -147,12 +149,19 @@ export class Interpreter extends ASTVisitor {
     }
 
     public visitAssignAST(node: AssignAST): void {
-        const variableName = node.getLeft().getName();
+        const variableName = node.getName();
         const variableValue = this.visit(node.getRight());
 
         const activationRecord = this.CALL_STACK.peek() as ActivationRecord;
 
-        activationRecord.set(variableName, variableValue);
+        if (activationRecord.containsKey(variableName)) {
+            activationRecord.set(variableName, variableValue);
+            return variableValue;
+        } else {
+            throw new Error(
+                `Runtime error. Undefined variable <${variableName}>`,
+            );
+        }
     }
 
     public visitVariableAST(node: VariableAST): number {
@@ -160,7 +169,10 @@ export class Interpreter extends ASTVisitor {
 
         const activationRecord = this.CALL_STACK.peek() as ActivationRecord;
 
-        const value = activationRecord.get<number>(variableName);
+        const value = activationRecord.get<number>(
+            variableName,
+            { checkEnclosing: true },
+        );
 
         return value;
     }
@@ -179,7 +191,8 @@ export class Interpreter extends ASTVisitor {
         const activationRecord = new ActivationRecord({
             name: programName,
             type: EActiveRecordType.PROGRAM,
-            nestingLevel: 1
+            nestingLevel: 1,
+            enclosingAR: null,
         });
 
         this.CALL_STACK.push(activationRecord);
@@ -187,7 +200,8 @@ export class Interpreter extends ASTVisitor {
         this.visit(node.getBlock());
 
         this._log(`Leave: Program ${programName}`);
-        this.CALL_STACK.print();
+        
+        // this.CALL_STACK.print();
 
         this.CALL_STACK.pop();
     }
@@ -223,16 +237,39 @@ export class Interpreter extends ASTVisitor {
         return;
     }
 
+    public visitBlockStmtAST(node: BlockStmtAST): void {
+        // TODO: environment
+        const previous = this.CALL_STACK.peek();
+
+        const ar = new ActivationRecord({
+            name: 'block',
+            type: EActiveRecordType.BLOCK,
+            nestingLevel: previous.getNestingLevel() + 1,
+            enclosingAR: previous,
+        });
+
+        ar.setEnclosingAR(previous);
+
+        this.CALL_STACK.push(ar);
+
+        node.getStatements().forEach((stmt) => {
+            this.visit(stmt);
+        });
+
+        // this.CALL_STACK.print();
+
+        this.CALL_STACK.pop();
+    }
+
     public visitProcedureCallAST(node: ProcedureCallAST): void {
         const procedureName = node.getProcedureName();
 
         const ar = new ActivationRecord({
             name: procedureName,
-            type: EActiveRecordType.PROCEDURE,
+            type: EActiveRecordType.BLOCK,
             nestingLevel: 2,
+            enclosingAR: this.CALL_STACK.peek(),
         });
-
-        console.log(node);
 
         const procedureSymbol = node.getProcedureSymbol();
 
@@ -249,16 +286,14 @@ export class Interpreter extends ASTVisitor {
             ar.set(name, resutlValue);
         });
 
-        console.log('AR', JSON.stringify(ar));
-
         this.CALL_STACK.push(ar);
 
         this._log(`Enter: procedure ${procedureSymbol.getName()}`);
-        this.CALL_STACK.print();
+        // this.CALL_STACK.print();
 
         this.visit(procedureSymbol.getBlock());
 
-        this.CALL_STACK.print();
+        // this.CALL_STACK.print();
         this._log(`Leave: procedure ${procedureSymbol.getName()}`);
 
         this.CALL_STACK.pop();
