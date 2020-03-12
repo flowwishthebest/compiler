@@ -55,8 +55,24 @@ import { AnotherParser } from './another-parser';
 (function asdsd(): any {
     const text = `
         var a := 1;
-        var b := 2;
-        print a >= b;
+        var b := 1;
+        var c := 1;
+        {
+            var a := 2;
+            var b := 2;
+            {
+                var a := 3;
+                print a;
+                print b;
+                print c;
+            }
+            print a;
+            print b;
+            print c;
+        }
+        print a;
+        print b;
+        print c;
     `;
 
     const scanner = new Tokenizer(text);
@@ -65,7 +81,7 @@ import { AnotherParser } from './another-parser';
 
     const tree = parser.parse();
 
-    // console.log(tree);
+    console.log(Utils.inspect(tree, { depth: null }));
 
     const interpreter = new Interpreter(tree);
     interpreter.interpret(); 

@@ -1,12 +1,14 @@
 export enum EActiveRecordType {
     PROGRAM = 'PROGRAM',
     PROCEDURE = 'PROCEDURE',
+    BLOCK = 'BLOCK'
 }
 
 interface KwArgs {
     name: string;
     type: EActiveRecordType;
     nestingLevel: number;
+    enclosingAR: ActivationRecord;
 }
 
 export class ActivationRecord {
@@ -14,11 +16,13 @@ export class ActivationRecord {
     private readonly _name: string;
     private readonly _type: EActiveRecordType;
     private readonly _nestingLevel: number;
+    private _enclosingAR: ActivationRecord;
 
     constructor(kwArgs: KwArgs) {
         this._name = kwArgs.name;
         this._type = kwArgs.type;
         this._nestingLevel = kwArgs.nestingLevel;
+        this._enclosingAR = kwArgs.enclosingAR;
     }
     
     public getName(): string {
@@ -33,14 +37,40 @@ export class ActivationRecord {
         return this._nestingLevel;
     }
 
+    public getEnclosingAR(): ActivationRecord | null {
+        return this._enclosingAR;
+    }
+
+    public setEnclosingAR(v: ActivationRecord): this {
+        this._enclosingAR = v;
+
+        return this;
+    }
+
     public set<T>(key: string, value: T): this {
         this._members.set(key, value);
 
         return this;
     }
 
-    public get<T>(key: string): T {
-        return this._members.get(key);
+    public get<T>(
+        key: string,
+        opts: { checkEnclosing: boolean } = { checkEnclosing: false },
+    ): T {
+
+        if (this._members.has(key)) {
+            return this._members.get(key);
+        }
+        
+        if (opts.checkEnclosing && this.getEnclosingAR()) {
+            return this.getEnclosingAR().get(key, { checkEnclosing: true });
+        }
+
+        return null;
+    }
+
+    public containsKey(key: string): boolean {
+        return this._members.has(key);
     }
 
     public toString(): string {

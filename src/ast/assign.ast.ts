@@ -23,4 +23,8 @@ export class AssignAST extends AST {
     public getRight(): AST {
         return this._right;
     }
+
+    public getName(): string {
+        return this._left.getName();
+    }
 }
