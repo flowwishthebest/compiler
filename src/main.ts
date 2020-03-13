@@ -56,6 +56,7 @@ import { AnotherParser } from './another-parser';
     const text = `
       var A := { 1, 2, 3, 4, 5 };
       var B := {6, 7, 8};
+
       print(A | B);
 
       A := { 1,2,3,4,5,6};
