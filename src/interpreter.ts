@@ -24,6 +24,13 @@ import { VarDeclAST } from "./ast/var-decl.ast";
 import { BlockStmtAST } from "./ast/block-stm.ast";
 import { LogicalAST } from "./ast/logical.ast";
 import { SetAST } from "./ast/set.ast";
+import {
+    setUnion,
+    setDifference,
+    setIsSuperset,
+    setEquality,
+    setIsSubset,
+} from "./utils/set";
 
 interface Options {
     shouldLogStack: boolean;
@@ -93,7 +100,7 @@ export class Interpreter extends ASTVisitor {
                 if (left instanceof SetAST && right instanceof SetAST) {
                     const a = this.visit(left);
                     const b = this.visit(right);
-                    return this._setUnion(a, b);
+                    return setUnion(a, b);
                 }
 
                 return this.visit(left) + this.visit(right);
@@ -102,7 +109,7 @@ export class Interpreter extends ASTVisitor {
                 if (left instanceof SetAST && right instanceof SetAST) {
                     const a = this.visit(left);
                     const b = this.visit(right);
-                    return this._setDifference(a, b);
+                    return setDifference(a, b);
                 }
                 return this.visit(left) - this.visit(right);
             }
@@ -119,7 +126,7 @@ export class Interpreter extends ASTVisitor {
                 if (left instanceof SetAST && right instanceof SetAST) {
                     const a = this.visit(left);
                     const b = this.visit(right);
-                    return this._setIsSuperset(a, b) && !this._setEquality(a, b);
+                    return setIsSuperset(a, b) && !setEquality(a, b);
                 }
                 return this.visit(left) > this.visit(right);
             }
@@ -127,7 +134,7 @@ export class Interpreter extends ASTVisitor {
                 if (left instanceof SetAST && right instanceof SetAST) {
                     const a = this.visit(left);
                     const b = this.visit(right);
-                    return this._setIsSuperset(a, b);
+                    return setIsSuperset(a, b);
                 }
                 return this.visit(left) >= this.visit(right);
             }
@@ -135,7 +142,7 @@ export class Interpreter extends ASTVisitor {
                 if (left instanceof SetAST && right instanceof SetAST) {
                     const a = this.visit(left);
                     const b = this.visit(right);
-                    return this._setIsSubset(a, b) && !this._setEquality(a, b);
+                    return setIsSubset(a, b) && !setEquality(a, b);
                 }
                 return this.visit(left) < this.visit(right);
             }
@@ -143,7 +150,7 @@ export class Interpreter extends ASTVisitor {
                 if (left instanceof SetAST && right instanceof SetAST) {
                     const a = this.visit(left);
                     const b = this.visit(right);
-                    return this._setIsSubset(a, b);
+                    return setIsSubset(a, b);
                 }
                 return this.visit(left) <= this.visit(right);
             }
@@ -398,83 +405,5 @@ export class Interpreter extends ASTVisitor {
 
     private _iftruthy(val: any): boolean {
         return !!val;
-    }
-
-    private _setUnion(a: Set<any>, b: Set<any>): Set<any> {
-        const union = new Set(a);
-        for (const elem of b) {
-            union.add(elem);
-        }
-        return union;
-    }
-
-    private _setIsSuperset(a: Set<any>, subset: Set<any>): boolean {
-        for (const el of subset) {
-            if (!a.has(el)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private _setIsSubset(subset: Set<any>, superset: Set<any>): boolean {
-        for (const el of subset) {
-            if (!superset.has(el)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private _setIntersection(a: Set<any>, b: Set<any>): Set<any> {
-        const intersection = new Set();
-        for (const el of b) {
-            if (a.has(el)) {
-                intersection.add(el);
-            }
-        }
-        return intersection;
-    }
-
-    private _setSymmetricDifference(a: Set<any>, b: Set<any>): Set<any> {
-        const difference = new Set(a);
-        for (const el of b) {
-            if (difference.has(el)) {
-                difference.delete(el);
-            } else {
-                difference.add(el);
-            }
-        }
-        return difference;
-    }
-    
-    private _setDifference(a: Set<any>, b: Set<any>): Set<any> {
-        const difference = new Set(a);
-        for (const el of b) {
-            difference.delete(el);
-        }
-        return difference;
-    }
-
-    private _setLess(a: Set<any>, b: Set<any>): boolean {
-        return a.size < b.size;
-    }
-
-    private _setGreater(a: Set<any>, b: Set<any>): boolean {
-        return a.size > b.size;
-    }
-
-    private _setEquality(a: Set<any>, b: Set<any>): boolean {
-        if (a.size !== b.size) {
-            return false;
-        }
-
-        for (const el of a) {
-            if (!b.has(a)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 }
