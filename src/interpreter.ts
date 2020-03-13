@@ -22,6 +22,7 @@ import { CallStack } from "./call-stack";
 import { ActivationRecord, EActiveRecordType } from "./activation-record";
 import { VarDeclAST } from "./ast/var-decl.ast";
 import { BlockStmtAST } from "./ast/block-stm.ast";
+import { LogicalAST } from "./ast/logical.ast";
 
 interface Options {
     shouldLogStack: boolean;
@@ -29,11 +30,13 @@ interface Options {
 
 // TODO: runtime errors
 export class Interpreter extends ASTVisitor {
+
     private readonly CALL_STACK: CallStack;
+    private _globalScope: ActivationRecord = null;
 
     constructor(
         private readonly _tree: AST,
-        private readonly _options: Options = { shouldLogStack: true }
+        private readonly _options: Options = { shouldLogStack: false }
     ) {
         super();
 
@@ -55,10 +58,10 @@ export class Interpreter extends ASTVisitor {
             name: 'global',
             type: EActiveRecordType.PROGRAM,
             nestingLevel: 1,
-            enclosingAR: null,
         });
 
         this.CALL_STACK.push(activationRecord);
+        this._globalScope = activationRecord;
 
         for (const stmt of node.getStatements()) {
             this.visit(stmt);
@@ -152,29 +155,41 @@ export class Interpreter extends ASTVisitor {
         const variableName = node.getName();
         const variableValue = this.visit(node.getRight());
 
-        const activationRecord = this.CALL_STACK.peek() as ActivationRecord;
-
-        if (activationRecord.containsKey(variableName)) {
-            activationRecord.set(variableName, variableValue);
-            return variableValue;
-        } else {
-            throw new Error(
-                `Runtime error. Undefined variable <${variableName}>`,
-            );
+        let ar = this.CALL_STACK.peek();
+ 
+        if (ar.containsKey(variableName, { checkEnclosing: false })) {
+            ar.set(variableName, variableValue);
+            return;
         }
+
+        // check global
+
+        if (this._globalScope.containsKey(variableName, { checkEnclosing: false })) {
+            this._globalScope.set(variableName, variableValue);
+            return;
+        }
+
+        // no local & global. thorw
+
+        throw new Error(
+            `Runtime error. Undefined variable <${variableName}>`,
+        );
     }
 
     public visitVariableAST(node: VariableAST): number {
         const variableName = node.getName();
 
-        const activationRecord = this.CALL_STACK.peek() as ActivationRecord;
+        const currentAr = this.CALL_STACK.peek() as ActivationRecord;
 
-        const value = activationRecord.get<number>(
-            variableName,
-            { checkEnclosing: true },
-        );
+        if (currentAr.containsKey(variableName, { checkEnclosing: false })) {
+            return currentAr.get(variableName);
+        }
 
-        return value;
+        if (this._globalScope.containsKey(variableName, { checkEnclosing: false })) {
+            return this._globalScope.get(variableName);
+        }
+
+        throw new Error('Runtime error. Variable not found: ' + variableName);
     }
 
     public visitCompoundAST(node: CompoundAST): void {
@@ -217,7 +232,9 @@ export class Interpreter extends ASTVisitor {
             value = this.visit(node.getInitializer());
         }
 
-        this.CALL_STACK.peek().set(node.getName(), value);
+        const ar = this.CALL_STACK.peek();
+
+        ar.set(node.getName(), value);
     }
 
     public visitVariableDeclarationAST(
@@ -300,22 +317,36 @@ export class Interpreter extends ASTVisitor {
     }
 
     public visitIfAST(node: IfAST): void {
-        const cond = node.getCondition();
-        const condValue = this.visit(cond);
+        const condition = this.visit(node.getCondition());
 
-        if (this._iftruthy(condValue)) {
+        if (this._iftruthy(condition)) {
             this.visit(node.getIfPart());
         } else if (node.getElsePart()) {
             this.visit(node.getElsePart());
         }
 
         return null;
-        
+    }
+
+    public visitLogicalAST(node: LogicalAST): void {
+        const left = this.visit(node.getLeft());
+
+        if (node.getOperator().getType() === ETokenType.OR) {
+            if (this._iftruthy(left)) {
+                return left;
+            }
+        } else {
+            if (!this._iftruthy(left)) {
+                return left;
+            }
+        }
+
+        return this.visit(node.getRight());
     }
 
     public visitWhileAST(node: WhileAST): void {
-        while (this.visit(node.getCondition())) {
-            this.visit(node.getBlock());
+        while (this._iftruthy(this.visit(node.getCondition()))) {
+            this.visit(node.getBody());
         }
     }
 

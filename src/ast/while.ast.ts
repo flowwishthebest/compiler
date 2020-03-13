@@ -1,17 +1,16 @@
 import { AST } from "./ast";
-import { BlockAST } from './block.ast';
 
 export class WhileAST extends AST {
 
     constructor(
         private readonly _condition: AST,
-        private readonly _block: AST,
+        private readonly _body: AST,
     ) {
         super();
     }
 
-    public getBlock(): AST {
-        return this._block;
+    public getBody(): AST {
+        return this._body;
     }
 
     public getCondition(): AST {

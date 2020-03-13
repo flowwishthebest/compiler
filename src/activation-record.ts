@@ -8,7 +8,7 @@ interface KwArgs {
     name: string;
     type: EActiveRecordType;
     nestingLevel: number;
-    enclosingAR: ActivationRecord;
+    enclosingAR?: ActivationRecord | null;
 }
 
 export class ActivationRecord {
@@ -22,7 +22,7 @@ export class ActivationRecord {
         this._name = kwArgs.name;
         this._type = kwArgs.type;
         this._nestingLevel = kwArgs.nestingLevel;
-        this._enclosingAR = kwArgs.enclosingAR;
+        this._enclosingAR = kwArgs.enclosingAR || null;
     }
     
     public getName(): string {
@@ -69,8 +69,13 @@ export class ActivationRecord {
         return null;
     }
 
-    public containsKey(key: string): boolean {
-        return this._members.has(key);
+    public containsKey(
+        key: string,
+        opts: { checkEnclosing: boolean } = { checkEnclosing: true },
+    ): boolean {
+        const hasKey = this._members.has(key);
+        return hasKey || (this.getEnclosingAR() && opts.checkEnclosing &&
+                this.getEnclosingAR().containsKey(key));
     }
 
     public toString(): string {

@@ -54,25 +54,15 @@ import { AnotherParser } from './another-parser';
 
 (function asdsd(): any {
     const text = `
-        var a := 1;
-        var b := 1;
-        var c := 1;
-        {
-            var a := 2;
-            var b := 2;
-            {
-                var a := 3;
-                print a;
-                print b;
-                print c;
-            }
-            print a;
-            print b;
-            print c;
-        }
+      var a := 0;
+      var b := 1;
+      
+      while (a < 10000) {
         print a;
-        print b;
-        print c;
+        var temp := a;
+        a := b;
+        b := temp + b;
+      }
     `;
 
     const scanner = new Tokenizer(text);
