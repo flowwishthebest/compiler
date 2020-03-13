@@ -17,9 +17,13 @@ import { IfAST } from './ast/if.ast';
 import { LogicalAST } from './ast/logical.ast';
 import { WhileAST } from './ast/while.ast';
 import { SetAST } from './ast/set.ast';
+import { ArrayAST } from './ast/array.ast';
 
 type UnaryExp = UnaryOpAST | LiteralAST | PrimaryExp;
-type PrimaryExp = LiteralAST | VariableAST | SetAST;
+type PrimaryExp = LiteralAST |
+    VariableAST |
+    SetAST |
+    ArrayAST;
 type Statement = WhileAST | PrintAST | BlockStmtAST | IfAST;
 
 export class AnotherParser {
@@ -420,7 +424,30 @@ export class AnotherParser {
                 this._advance(ETokenType.LBRACKET);
                 return this._set();
             }
+            case ETokenType.OPEN_BRACKET: {
+                this._advance(ETokenType.OPEN_BRACKET);
+                return this._array();
+            }
         }
+    }
+
+    private _array(): ArrayAST {
+        const elements = [];
+
+        if (this._peek().getType() !== ETokenType.CLOSED_BRACKET) {
+            elements.push(this._expression());
+        }
+
+        while (this._peek().getType() === ETokenType.COMMA
+        && !this._isAtEnd()
+       ) {
+            this._advance(ETokenType.COMMA);
+            elements.push(this._expression());
+        }
+
+        this._advance(ETokenType.CLOSED_BRACKET);
+        
+        return new ArrayAST(elements);
     }
 
     private _set(): SetAST {

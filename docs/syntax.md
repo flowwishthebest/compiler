@@ -32,9 +32,11 @@ primary := "true"
     | NUMBER
     | IDENTIFIER
     | setLiteral
+    | arrayLiteral
     | "(" expression ")" ;
 
 setLiteral := "{" expression { COMMA expression } "}" ;
+arrayLiteral :+ "[" expression { COMMA expression } "]" ;
 
 statement := expressionStmt | ifStmt | printStmt | whileStmt | block ;
 

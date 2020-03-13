@@ -44,6 +44,8 @@ import { PrintToken } from './tokens/print.token';
 import { AmpersandToken } from './tokens/ampersand.token';
 import { BarToken } from './tokens/bar.token';
 import { CaretToken } from './tokens/caret.token';
+import { OpenBracketToken } from './tokens/open-bracket.token';
+import { ClosedBracketToken } from './tokens/closed-bracket.token';
 
 function isDigit(char: string): boolean {
     return '0' <= char && char <= '9';
@@ -83,6 +85,8 @@ const GREATER = '>';
 const AMPERSAND = '&';
 const BAR = '|';
 const CARET = '^';
+const OPEN_BRACKET = '[';
+const CLOSED_BRACKET = ']';
 
 export class Tokenizer {
     private readonly _keywords: Map<string, Token>;
@@ -231,6 +235,14 @@ export class Tokenizer {
                 case CARET: {
                     this._advance();
                     return new CaretToken();
+                }
+                case OPEN_BRACKET: {
+                    this._advance();
+                    return new OpenBracketToken();
+                }
+                case CLOSED_BRACKET: {
+                    this._advance();
+                    return new ClosedBracketToken();
                 }
                 default: {
                     if (isDigit(c)) {

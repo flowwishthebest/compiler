@@ -68,6 +68,8 @@ import { AnotherParser } from './another-parser';
       A := { 1,2,3,5,6};
       B := { 1,2, 4, 7 , 5};
       print(A ^ B);
+
+      print([1,2,3]);
     `;
 
     const scanner = new Tokenizer(text);

@@ -33,6 +33,7 @@ import {
     setIntersection,
     setSymmetricDifference,
 } from "./utils/set";
+import { ArrayAST } from "./ast/array.ast";
 
 interface Options {
     shouldLogStack: boolean;
@@ -200,6 +201,10 @@ export class Interpreter extends ASTVisitor {
                 throw new Error(`Unknown op name ${operator.getType()}`);
             }
         }
+    }
+
+    public visitArrayAST(node: ArrayAST): Array<any> {
+        return node.getElements().map((n) => this.visit(n));
     }
 
     public visitUnaryOpAST(node: UnaryOpAST): number | boolean {

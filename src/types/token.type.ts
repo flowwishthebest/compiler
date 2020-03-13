@@ -41,4 +41,6 @@ export enum ETokenType {
     AMPERSAND = 'AMPERSAND',
     BAR = 'BAR',
     CARET = 'CARET',
+    OPEN_BRACKET = 'OPEN_BRACKET',
+    CLOSED_BRACKET = 'CLOSED_BRACKET',
 }
