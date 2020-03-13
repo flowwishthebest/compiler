@@ -23,6 +23,7 @@ import { ActivationRecord, EActiveRecordType } from "./activation-record";
 import { VarDeclAST } from "./ast/var-decl.ast";
 import { BlockStmtAST } from "./ast/block-stm.ast";
 import { LogicalAST } from "./ast/logical.ast";
+import { SetAST } from "./ast/set.ast";
 
 interface Options {
     shouldLogStack: boolean;
@@ -74,24 +75,35 @@ export class Interpreter extends ASTVisitor {
 
     public visitPrintAST(node: PrintAST): void {
         const expression = this.visit(node.getExpression());
-
-        console.log(JSON.stringify(expression));
+        
+        console.log(require('util').inspect(expression, { depth: null }));
     }
 
     public visitExpressionAST(node: ExpressionAST): void {
         this.visit(node.getExpression());
     }
 
-    public visitBinOpAST(node: BinOpAST): number | boolean {
+    public visitBinOpAST(node: BinOpAST): number | boolean | Set<any> {
         const left = node.getLeft();
         const right = node.getRight();
         const operator = node.getOperator();
 
         switch (operator.getType()) {
             case ETokenType.PLUS: {
+                if (left instanceof SetAST && right instanceof SetAST) {
+                    const a = this.visit(left);
+                    const b = this.visit(right);
+                    return this._setUnion(a, b);
+                }
+
                 return this.visit(left) + this.visit(right);
             }
             case ETokenType.MINUS: {
+                if (left instanceof SetAST && right instanceof SetAST) {
+                    const a = this.visit(left);
+                    const b = this.visit(right);
+                    return this._setDifference(a, b);
+                }
                 return this.visit(left) - this.visit(right);
             }
             case ETokenType.MUL: {
@@ -104,15 +116,35 @@ export class Interpreter extends ASTVisitor {
                 return Math.trunc(this.visit(left) / this.visit(right));
             }
             case ETokenType.GREATER: {
+                if (left instanceof SetAST && right instanceof SetAST) {
+                    const a = this.visit(left);
+                    const b = this.visit(right);
+                    return this._setIsSuperset(a, b) && !this._setEquality(a, b);
+                }
                 return this.visit(left) > this.visit(right);
             }
             case ETokenType.GREATER_EQUAL: {
+                if (left instanceof SetAST && right instanceof SetAST) {
+                    const a = this.visit(left);
+                    const b = this.visit(right);
+                    return this._setIsSuperset(a, b);
+                }
                 return this.visit(left) >= this.visit(right);
             }
             case ETokenType.LESS: {
+                if (left instanceof SetAST && right instanceof SetAST) {
+                    const a = this.visit(left);
+                    const b = this.visit(right);
+                    return this._setIsSubset(a, b) && !this._setEquality(a, b);
+                }
                 return this.visit(left) < this.visit(right);
             }
             case ETokenType.LESS_EQUAL: {
+                if (left instanceof SetAST && right instanceof SetAST) {
+                    const a = this.visit(left);
+                    const b = this.visit(right);
+                    return this._setIsSubset(a, b);
+                }
                 return this.visit(left) <= this.visit(right);
             }
             case ETokenType.EQUAL_EQUAL: {
@@ -155,7 +187,7 @@ export class Interpreter extends ASTVisitor {
         const variableName = node.getName();
         const variableValue = this.visit(node.getRight());
 
-        let ar = this.CALL_STACK.peek();
+        const ar = this.CALL_STACK.peek();
  
         if (ar.containsKey(variableName, { checkEnclosing: false })) {
             ar.set(variableName, variableValue);
@@ -344,6 +376,14 @@ export class Interpreter extends ASTVisitor {
         return this.visit(node.getRight());
     }
 
+    public visitSetAST(node: SetAST): Set<any> {
+        const h =  node.getElements().map((n) => {
+            return this.visit(n);
+        });
+
+        return new Set(h);
+    }
+
     public visitWhileAST(node: WhileAST): void {
         while (this._iftruthy(this.visit(node.getCondition()))) {
             this.visit(node.getBody());
@@ -359,5 +399,82 @@ export class Interpreter extends ASTVisitor {
     private _iftruthy(val: any): boolean {
         return !!val;
     }
+
+    private _setUnion(a: Set<any>, b: Set<any>): Set<any> {
+        const union = new Set(a);
+        for (const elem of b) {
+            union.add(elem);
+        }
+        return union;
+    }
+
+    private _setIsSuperset(a: Set<any>, subset: Set<any>): boolean {
+        for (const el of subset) {
+            if (!a.has(el)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private _setIsSubset(subset: Set<any>, superset: Set<any>): boolean {
+        for (const el of subset) {
+            if (!superset.has(el)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private _setIntersection(a: Set<any>, b: Set<any>): Set<any> {
+        const intersection = new Set();
+        for (const el of b) {
+            if (a.has(el)) {
+                intersection.add(el);
+            }
+        }
+        return intersection;
+    }
+
+    private _setSymmetricDifference(a: Set<any>, b: Set<any>): Set<any> {
+        const difference = new Set(a);
+        for (const el of b) {
+            if (difference.has(el)) {
+                difference.delete(el);
+            } else {
+                difference.add(el);
+            }
+        }
+        return difference;
+    }
     
+    private _setDifference(a: Set<any>, b: Set<any>): Set<any> {
+        const difference = new Set(a);
+        for (const el of b) {
+            difference.delete(el);
+        }
+        return difference;
+    }
+
+    private _setLess(a: Set<any>, b: Set<any>): boolean {
+        return a.size < b.size;
+    }
+
+    private _setGreater(a: Set<any>, b: Set<any>): boolean {
+        return a.size > b.size;
+    }
+
+    private _setEquality(a: Set<any>, b: Set<any>): boolean {
+        if (a.size !== b.size) {
+            return false;
+        }
+
+        for (const el of a) {
+            if (!b.has(a)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

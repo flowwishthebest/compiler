@@ -16,9 +16,10 @@ import { VarDeclAST } from './ast/var-decl.ast';
 import { IfAST } from './ast/if.ast';
 import { LogicalAST } from './ast/logical.ast';
 import { WhileAST } from './ast/while.ast';
+import { SetAST } from './ast/set.ast';
 
 type UnaryExp = UnaryOpAST | LiteralAST | PrimaryExp;
-type PrimaryExp = LiteralAST | VariableAST;
+type PrimaryExp = LiteralAST | VariableAST | SetAST;
 type Statement = WhileAST | PrintAST | BlockStmtAST | IfAST;
 
 export class AnotherParser {
@@ -385,7 +386,30 @@ export class AnotherParser {
                 this._advance(ETokenType.ID);
                 return new VariableAST(currentToken);
             }
+            case ETokenType.LBRACKET: {
+                this._advance(ETokenType.LBRACKET);
+                return this._set();
+            }
         }
+    }
+
+    private _set(): SetAST {
+        const elements = [];
+
+        if (this._peek().getType() !== ETokenType.RBRACKET) {
+            elements.push(this._expression());
+        }
+
+        while (this._peek().getType() === ETokenType.COMMA
+            && !this._isAtEnd()
+        ) {
+            this._advance(ETokenType.COMMA);
+            elements.push(this._expression());
+        }
+
+        this._advance(ETokenType.RBRACKET);
+        
+        return new SetAST(elements);
     }
 
     private _peek(): Token {
