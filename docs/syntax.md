@@ -26,7 +26,15 @@ multiplication → unary (( "/" | "*" ) unary)* ;
 
 unary := ("!" | "-") unary | primary ;
 
-primary := "true" | "false" | "nil" | NUMBER | IDENTIFIER | "(" expression ")" ;
+primary := "true"
+    |"false"
+    | "nil"
+    | NUMBER
+    | IDENTIFIER
+    | setLiteral
+    | "(" expression ")" ;
+
+setLiteral := "{" expression { COMMA expression } "}" ;
 
 statement := expressionStmt | ifStmt | printStmt | whileStmt | block ;
 
@@ -41,12 +49,20 @@ whileStatement := "while" "(" expression ")" statement ;
 block := "{" declaration* "}" ;
 
 NUMBER := DIGIT+ ("." DIGIT+)? ;
+
 IDENTIFIER := ALPHA (ALPHA | DIGIT)* ;
+
 ALPHA := "a"..."z" | "A"..."Z" | '_' ;
+
 DIGIT := "0"..."9" ;
+
 DOT = "." ;
+
 ASSIGN := ":=" ;
+
 SEMICOLON := ";" ;
+
+COMMA := "," ;
 
 singleLineComment := SLASH SLASH (NUMBER | ALPHA)? NEWLINE ;
 

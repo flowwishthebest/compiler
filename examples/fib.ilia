@@ -9,3 +9,48 @@ while (a < 10000) {
     a := b;
     b := temp + b;
 }
+
+
+var c := Set(1, 2, 3,);
+
+var z := { 1, 2, 3, };
+
+
+// 1. Union. Возвращает множество, являющееся объединением множеств A и B.
+// A + B ;; union(A, B);
+
+// 2. Update. Добавляет в множество A все элементы из множества B.
+// A |= B ;; unionUpdate(A, B); // inplace
+
+// 3. Intersection. Возвращает множество, являющееся пересечением множеств A и B.
+// A & B ;; intersection(A, B);
+
+// 4. Intersection update. Оставляет в множестве A только те элементы, которые есть в множестве B.
+// A &= B ;; intersectionUpdate(A, B); // inplace
+
+// 5. Difference. Возвращает разность множеств A и B (элементы, входящие в A, но не входящие в B).
+// A - B  ;; difference(A, B);
+
+// 6. Difference update. Удаляет из множества A все элементы, входящие в B.
+// A -= B ;; differenceUpdate(A, B);
+
+// 7. Symmetric difference. Возвращает симметрическую разность множеств A и B (элементы, входящие в A или в B, но не в оба из них одновременно).
+// A ^ B ;; symmetricDifference(A, B);
+
+// 8. Symmetric difference update. Записывает в A симметрическую разность множеств A и B.
+// A ^= B  ;; symmetricDifferenceUpdate(A, B);
+
+// 9. Is subset. Возвращает true, если A является подмножеством B.
+// A <= B ;; issubset(A, B);
+
+// 10. Is superset.Возвращает true, если B является подмножеством A.
+// A >= B ;; issuperset(A, B);
+
+// 11. Less. Вовращает true, если множетво A содержит меньше элементов, чем множество B.
+// A < B ;; less(A, B);
+
+// 12. Greater. Вовращает true, если множетво A содержит больше элементов, чем множество B.
+// A > B ;; greater(A, B);
+
+
+{ 1,2,3 } <= { 2,3,4 };
