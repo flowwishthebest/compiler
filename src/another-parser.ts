@@ -13,9 +13,13 @@ import { ProgAST
  } from './ast/prog.ast';
 import { BlockStmtAST } from './ast/block-stm.ast';
 import { VarDeclAST } from './ast/var-decl.ast';
+import { IfAST } from './ast/if.ast';
+import { LogicalAST } from './ast/logical.ast';
+import { WhileAST } from './ast/while.ast';
 
 type UnaryExp = UnaryOpAST | LiteralAST | PrimaryExp;
 type PrimaryExp = LiteralAST | VariableAST;
+type Statement = WhileAST | PrintAST | BlockStmtAST | IfAST;
 
 export class AnotherParser {
     private readonly UNEXPECTED_TOKEN_MESSAGE = (token: Token): string =>
@@ -74,13 +78,21 @@ export class AnotherParser {
         return new VarDeclAST(varToken, initializer);
     }
 
-    private _statement(): PrintAST | BlockStmtAST {
+    private _statement(): Statement {
         const currentToken = this._peek();
 
         switch (currentToken.getType()) {
+            case ETokenType.IF: {
+                this._advance(ETokenType.IF);
+                return this._if();
+            }
             case ETokenType.PRINT: {
                 this._advance(ETokenType.PRINT);
                 return this._print();
+            }
+            case ETokenType.WHILE: {
+                this._advance(ETokenType.WHILE);
+                return this._while();
             }
             case ETokenType.LBRACKET: {
                 this._advance(ETokenType.LBRACKET);
@@ -90,6 +102,32 @@ export class AnotherParser {
                 return this._expressionStmt();
             }
         }
+    }
+
+    private _while(): WhileAST {
+        this._advance(ETokenType.LPAREN);
+        const condition = this._expression();
+        this._advance(ETokenType.RPAREN);
+
+        const body = this._statement();
+
+        return new WhileAST(condition, body);
+    }
+
+    private _if(): IfAST {
+        this._advance(ETokenType.LPAREN);
+        const condition = this._expression();
+        this._advance(ETokenType.RPAREN);
+
+        const truePart = this._statement();
+
+        let falsePart = null;
+        if (this._peek().getType() === ETokenType.ELSE) {
+            this._advance(ETokenType.ELSE);
+            falsePart = this._statement();
+        }
+
+        return new IfAST(condition, truePart, falsePart);
     }
 
     private _block(): BlockStmtAST {
@@ -124,7 +162,7 @@ export class AnotherParser {
     }
 
     private _assignment(): any {
-        const expr = this._equality();
+        const expr = this._or();
 
         if (this._peek().getType() === ETokenType.ASSIGN) {
             const t = this._peek();
@@ -141,7 +179,33 @@ export class AnotherParser {
         return expr;
     }
 
-    private _equality(): BinOpAST | UnaryExp { // TODO: type
+    private _and(): LogicalAST | BinOpAST | UnaryExp {
+        let expr = this._equality();
+
+        while (this._peek().getType() === ETokenType.AND) {
+            const op = this._peek();
+
+            this._advance(ETokenType.AND);
+
+            expr = new LogicalAST(expr, op, this._equality());
+        }
+
+        return expr;
+    }
+
+    private _or(): any {
+        let expr = this._and();
+
+        while (this._peek().getType() === ETokenType.OR) {
+            const op = this._peek();
+            this._advance(ETokenType.OR);
+            expr = new LogicalAST(expr, op, this._and());
+        }
+        
+        return expr;
+    }
+
+    private _equality(): LogicalAST | BinOpAST | UnaryExp { // TODO: type
         // quality := comparison ( ( "!=" | "==" ) comparison )* ;
         let expr = this._comparition();
 

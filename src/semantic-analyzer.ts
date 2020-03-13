@@ -260,7 +260,7 @@ export class SemanticAnalyzer extends ASTVisitor {
 
     public visitWhileAST(node: WhileAST): void {
         this.visit(node.getCondition());
-        this.visit(node.getBlock());
+        this.visit(node.getBody());
     }
 
     private _throw(msg: string, errType: EErrorType, token: Token): never {
