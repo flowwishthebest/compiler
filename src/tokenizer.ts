@@ -41,6 +41,9 @@ import { LessToken } from './tokens/less.token';
 import { GreaterEqualToken } from './tokens/greater-equal.token';
 import { GreaterToken } from './tokens/greater.token';
 import { PrintToken } from './tokens/print.token';
+import { AmpersandToken } from './tokens/ampersand.token';
+import { BarToken } from './tokens/bar.token';
+import { CaretToken } from './tokens/caret.token';
 
 function isDigit(char: string): boolean {
     return '0' <= char && char <= '9';
@@ -77,6 +80,9 @@ const NEWLINE = '\n';
 const BANG = '!';
 const LESS = '<';
 const GREATER = '>';
+const AMPERSAND = '&';
+const BAR = '|';
+const CARET = '^';
 
 export class Tokenizer {
     private readonly _keywords: Map<string, Token>;
@@ -214,7 +220,18 @@ export class Tokenizer {
                     this._advance();
                     return new SemicolonToken();
                 }
-
+                case AMPERSAND: {
+                    this._advance();
+                    return new AmpersandToken();
+                }
+                case BAR: {
+                    this._advance();
+                    return new BarToken();
+                }
+                case CARET: {
+                    this._advance();
+                    return new CaretToken();
+                }
                 default: {
                     if (isDigit(c)) {
                         return this._number();
