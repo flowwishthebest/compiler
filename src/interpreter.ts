@@ -24,6 +24,15 @@ import { VarDeclAST } from "./ast/var-decl.ast";
 import { BlockStmtAST } from "./ast/block-stm.ast";
 import { LogicalAST } from "./ast/logical.ast";
 import { SetAST } from "./ast/set.ast";
+import {
+    setUnion,
+    setDifference,
+    setIsSuperset,
+    setEquality,
+    setIsSubset,
+    setIntersection,
+    setSymmetricDifference,
+} from "./utils/set";
 
 interface Options {
     shouldLogStack: boolean;
@@ -90,20 +99,16 @@ export class Interpreter extends ASTVisitor {
 
         switch (operator.getType()) {
             case ETokenType.PLUS: {
-                if (left instanceof SetAST && right instanceof SetAST) {
-                    const a = this.visit(left);
-                    const b = this.visit(right);
-                    return this._setUnion(a, b);
-                }
-
                 return this.visit(left) + this.visit(right);
             }
             case ETokenType.MINUS: {
-                if (left instanceof SetAST && right instanceof SetAST) {
-                    const a = this.visit(left);
-                    const b = this.visit(right);
-                    return this._setDifference(a, b);
+                const a = this.visit(left);
+                const b = this.visit(right);
+
+                if (a instanceof Set && b instanceof Set) {
+                    return setDifference(a, b);
                 }
+
                 return this.visit(left) - this.visit(right);
             }
             case ETokenType.MUL: {
@@ -116,35 +121,43 @@ export class Interpreter extends ASTVisitor {
                 return Math.trunc(this.visit(left) / this.visit(right));
             }
             case ETokenType.GREATER: {
-                if (left instanceof SetAST && right instanceof SetAST) {
-                    const a = this.visit(left);
-                    const b = this.visit(right);
-                    return this._setIsSuperset(a, b) && !this._setEquality(a, b);
+                const a = this.visit(left);
+                const b = this.visit(right);
+
+                if (a instanceof Set && b instanceof Set) {
+                    return setIsSuperset(a, b) && !setEquality(a, b);
                 }
+
                 return this.visit(left) > this.visit(right);
             }
             case ETokenType.GREATER_EQUAL: {
-                if (left instanceof SetAST && right instanceof SetAST) {
-                    const a = this.visit(left);
-                    const b = this.visit(right);
-                    return this._setIsSuperset(a, b);
+                const a = this.visit(left);
+                const b = this.visit(right);
+
+                if (a instanceof Set && b instanceof Set) {
+                    return setIsSuperset(a, b);
                 }
+
                 return this.visit(left) >= this.visit(right);
             }
             case ETokenType.LESS: {
-                if (left instanceof SetAST && right instanceof SetAST) {
-                    const a = this.visit(left);
-                    const b = this.visit(right);
-                    return this._setIsSubset(a, b) && !this._setEquality(a, b);
+                const a = this.visit(left);
+                const b = this.visit(right);
+
+                if (a instanceof Set && b instanceof Set) {
+                    return setIsSubset(a, b) && !setEquality(a, b);
                 }
+
                 return this.visit(left) < this.visit(right);
             }
             case ETokenType.LESS_EQUAL: {
-                if (left instanceof SetAST && right instanceof SetAST) {
-                    const a = this.visit(left);
-                    const b = this.visit(right);
-                    return this._setIsSubset(a, b);
+                const a = this.visit(left);
+                const b = this.visit(right);
+
+                if (a instanceof Set && b instanceof Set) {
+                    return setIsSubset(a, b);
                 }
+
                 return this.visit(left) <= this.visit(right);
             }
             case ETokenType.EQUAL_EQUAL: {
@@ -152,6 +165,36 @@ export class Interpreter extends ASTVisitor {
             }
             case ETokenType.BANG_EQUAL: {
                 return this.visit(left) != this.visit(right);
+            }
+            case ETokenType.BAR: {
+                const a = this.visit(left);
+                const b = this.visit(right);
+
+                if (a instanceof Set && b instanceof Set) {
+                    return setUnion(a, b);
+                }
+
+                throw new Error('Runtime error. Not correct operands for BAR op');
+            }
+            case ETokenType.AMPERSAND: {
+                const a = this.visit(left);
+                const b = this.visit(right);
+
+                if (a instanceof Set && b instanceof Set) {
+                    return setIntersection(a, b);
+                }
+
+                throw new Error('Runtime error. Not correct operands for AMPERSAND op');
+            }
+            case ETokenType.CARET: {
+                const a = this.visit(left);
+                const b = this.visit(right);
+
+                if (a instanceof Set && b instanceof Set) {
+                    return setSymmetricDifference(a, b);
+                }
+
+                throw new Error('Runtime error. Not correct operands for CARET op');
             }
             default: {
                 throw new Error(`Unknown op name ${operator.getType()}`);

@@ -54,7 +54,19 @@ import { AnotherParser } from './another-parser';
 
 (function main(): any {
     const text = `
-      print ({ 1, 2, 3, 4, 5 } > { 3, 4, 5 }) ;
+      var A := { 1, 2, 3, 4, 5 };
+      var B := {6, 7, 8};
+      print(A | B);
+
+      A := { 1,2,3,4,5,6};
+      B := { 4 };
+      print(A & B);
+
+      print(A - B);
+
+      A := { 1,2,3,5,6};
+      B := { 1,2, 4, 7 , 5};
+      print(A ^ B);
     `;
 
     const scanner = new Tokenizer(text);
@@ -63,7 +75,7 @@ import { AnotherParser } from './another-parser';
 
     const tree = parser.parse();
 
-    // console.log(Utils.inspect(tree, { depth: null }));
+    console.log(Utils.inspect(tree, { depth: null }));
 
     const interpreter = new Interpreter(tree);
     interpreter.interpret(); 

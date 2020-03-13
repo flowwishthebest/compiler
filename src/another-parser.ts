@@ -234,16 +234,16 @@ export class AnotherParser {
     }
 
     private _comparition(): BinOpAST | UnaryExp { // TODO: type
-        let expr = this._addition();
+        let expression = this._bitwise();
 
         while (this._peek().getType() === ETokenType.GREATER ||
             this._peek().getType() === ETokenType.GREATER_EQUAL ||
             this._peek().getType() === ETokenType.LESS ||
             this._peek().getType() === ETokenType.LESS_EQUAL
         ) {
-            const op = this._peek();
+            const operator = this._peek();
 
-            switch (op.getType()) {
+            switch (operator.getType()) {
                 case ETokenType.GREATER: {
                     this._advance(ETokenType.GREATER);
                     break;
@@ -262,10 +262,40 @@ export class AnotherParser {
                 }
             }
 
-            expr = new BinOpAST(expr, op, this._addition());
+            expression = new BinOpAST(expression, operator, this._bitwise());
         }
 
-        return expr;
+        return expression;
+    }
+
+    private _bitwise(): BinOpAST | UnaryExp {
+        let expression = this._addition();
+
+        while (this._peek().getType() === ETokenType.BAR ||
+            this._peek().getType() === ETokenType.CARET ||
+            this._peek().getType() === ETokenType.AMPERSAND
+        ) {
+            const operator = this._peek();
+
+            switch (operator.getType()) {
+                case ETokenType.BAR: {
+                    this._advance(ETokenType.BAR);
+                    break;
+                }
+                case ETokenType.CARET: {
+                    this._advance(ETokenType.CARET);
+                    break;
+                }
+                case ETokenType.AMPERSAND: {
+                    this._advance(ETokenType.AMPERSAND);
+                    break;
+                }
+            }
+
+            expression = new BinOpAST(expression, operator, this._addition());
+        }
+
+        return expression;
     }
 
     /* comparison := addition ((">" | ">=" | "<" | "<=") addition)* ; */
