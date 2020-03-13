@@ -54,7 +54,9 @@ import { AnotherParser } from './another-parser';
 
 (function main(): any {
     const text = `
-      print ({ 1, 2, 3, 4, 5 } > { 3, 4, 5 }) ;
+      var A := { 1, 2, 3, 4, 5 };
+      var B := { 3, 4, 5 };
+      print(A >= B) ;
     `;
 
     const scanner = new Tokenizer(text);
