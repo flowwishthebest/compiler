@@ -6,7 +6,7 @@ import { ETokenType } from './types/token.type';
 import { UnaryOpAST } from './ast/unary-op.ast';
 import { LiteralAST } from './ast/literal.ast';
 import { BinOpAST } from './ast/bin-op.ast';
-import { VariableAST, AssignAST } from './ast';
+import { VariableAST, AssignAST, AST } from './ast';
 import { PrintAST } from './ast/print.ast';
 import { ExpressionAST } from './ast/expression.ast';
 import { ProgAST
@@ -18,8 +18,10 @@ import { LogicalAST } from './ast/logical.ast';
 import { WhileAST } from './ast/while.ast';
 import { SetAST } from './ast/set.ast';
 import { ArrayAST } from './ast/array.ast';
+import { CallAST } from './ast/call.ast';
+import { FuncAST } from './ast/func.ast';
 
-type UnaryExp = UnaryOpAST | LiteralAST | PrimaryExp;
+type UnaryExp = UnaryOpAST | LiteralAST | PrimaryExp | CallAST;
 type PrimaryExp = LiteralAST |
     VariableAST |
     SetAST |
@@ -52,6 +54,45 @@ export class AnotherParser {
         return progAST;
     }
 
+    private _call(): CallAST {
+        let expression: any = this._primary(); // TODO: type
+
+        for (;;) {
+            if (this._peek().getType() === ETokenType.LPAREN) {
+                this._advance(ETokenType.LPAREN);
+                expression = this._finishCall(expression);
+            } else {
+                break;
+            }
+        }
+
+        return expression;
+    }
+
+    private _finishCall(expr: AST): CallAST {
+        const args = [];
+
+        if (this._peek().getType() !== ETokenType.RPAREN && !this._isAtEnd()) {
+            args.push(this._expression());
+        }
+
+        while (this._peek().getType() === ETokenType.COMMA && !this._isAtEnd()) {
+
+            if (args.length >= 255) {
+                throw new Error('Parser error. Limit args is 255!');
+                // TODO: better error;
+            }
+            this._advance(ETokenType.COMMA);
+            args.push(this._expression());
+        }
+
+        const paren = this._peek();
+
+        this._advance(ETokenType.RPAREN);
+
+        return new CallAST(expr, paren, args);
+    }
+
     private _declaration(): any {
         // TODO: sync
         const currentToken = this._peek();
@@ -61,10 +102,41 @@ export class AnotherParser {
                 this._advance(ETokenType.VAR);
                 return this._varDecl();
             }
+            case ETokenType.FUNC: {
+                this._advance(ETokenType.FUNC);
+                return this._func();
+            }
             default: {
                 return this._statement();
             }
         }
+    }
+
+    private _func(): any { // TODO: types
+        const name = this._peek();
+
+        this._advance(ETokenType.ID);
+        this._advance(ETokenType.LPAREN);
+
+        const params = [];
+
+        if (this._peek().getType() !== ETokenType.RPAREN) {
+            params.push(this._peek());
+            this._advance(ETokenType.ID);
+        }
+
+        while (this._peek().getType() === ETokenType.COMMA && !this._isAtEnd()) {
+            this._advance(ETokenType.COMMA);
+            params.push(this._peek());
+            this._advance(ETokenType.ID);
+        }
+
+        this._advance(ETokenType.RPAREN);
+        this._advance(ETokenType.LBRACKET);
+
+        const body = this._block();
+
+        return new FuncAST(name, params, body);
     }
 
     private _varDecl(): any {
@@ -358,7 +430,7 @@ export class AnotherParser {
         return expr;
     }
 
-    /* unary := ("!" | "-" | "+") unary | primary ; */
+    /* unary := ("!" | "-" | "+") unary | call ; */
     private _unary(): UnaryExp {
         const currentToken = this._peek();
 
@@ -376,7 +448,8 @@ export class AnotherParser {
                 break;
             }
             default: {
-                return this._primary();
+                // TODO: check might be not!
+                return this._call();
             }
         }
 
@@ -439,8 +512,8 @@ export class AnotherParser {
         }
 
         while (this._peek().getType() === ETokenType.COMMA
-        && !this._isAtEnd()
-       ) {
+            && !this._isAtEnd()
+        ) {
             this._advance(ETokenType.COMMA);
             elements.push(this._expression());
         }

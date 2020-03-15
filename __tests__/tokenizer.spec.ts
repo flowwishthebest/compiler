@@ -21,6 +21,7 @@ import { ProcedureToken } from '../src/tokens/procedure.token';
 import { IfToken } from '../src/tokens/if.token';
 import { ElseToken } from '../src/tokens/else.token';
 import { WhileToken } from '../src/tokens/while.token';
+import { FuncToken } from '../src/tokens/func.token';
 
 describe('Tokenizer tests', () => {
     test('Recognize simplest expression', () => {
@@ -131,7 +132,7 @@ describe('Tokenizer tests', () => {
     });
 
     test('Unknown char throws exception', () => {
-        const tokenizer = new Tokenizer('  123   &        324     ');
+        const tokenizer = new Tokenizer('  123   %        324     ');
 
         const token = tokenizer.getNextToken();
         expect(token).toEqual(new IntegerConstToken(123));
@@ -441,6 +442,20 @@ describe('Tokenizer tests', () => {
         let token = tokenizer.getNextToken();
         expect(token).toEqual(new WhileToken());
         expect(token.getType()).toBe(ETokenType.WHILE);
+
+        token = tokenizer.getNextToken();
+        expect(token).toEqual(new EOFToken());
+        expect(token.getType()).toBe(ETokenType.EOF);
+    });
+
+    test('can recognize func token', () => {
+        const tokenizer = new Tokenizer(
+            `func`,
+        );
+
+        let token = tokenizer.getNextToken();
+        expect(token).toEqual(new FuncToken());
+        expect(token.getType()).toBe(ETokenType.FUNC);
 
         token = tokenizer.getNextToken();
         expect(token).toEqual(new EOFToken());

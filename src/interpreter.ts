@@ -34,6 +34,7 @@ import {
     setSymmetricDifference,
 } from "./utils/set";
 import { ArrayAST } from "./ast/array.ast";
+import { CallAST } from "./ast/call.ast";
 
 interface Options {
     shouldLogStack: boolean;
@@ -41,9 +42,7 @@ interface Options {
 
 // TODO: runtime errors
 export class Interpreter extends ASTVisitor {
-
     private readonly CALL_STACK: CallStack;
-    private _globalScope: ActivationRecord = null;
 
     constructor(
         private readonly _tree: AST,
@@ -71,8 +70,11 @@ export class Interpreter extends ASTVisitor {
             nestingLevel: 1,
         });
 
+        // TODO: remove from there
+
+        activationRecord.set('timeNow', () => Math.floor(Date.now() / 1000));
+
         this.CALL_STACK.push(activationRecord);
-        this._globalScope = activationRecord;
 
         for (const stmt of node.getStatements()) {
             this.visit(stmt);
@@ -235,41 +237,27 @@ export class Interpreter extends ASTVisitor {
         const variableName = node.getName();
         const variableValue = this.visit(node.getRight());
 
-        const ar = this.CALL_STACK.peek();
- 
-        if (ar.containsKey(variableName, { checkEnclosing: false })) {
+        const ar = this.CALL_STACK.peek().containsKey(variableName);
+
+        if (ar) {
             ar.set(variableName, variableValue);
-            return;
+        } else {
+            throw new Error(
+                `Runtime error. Undefined variable <${variableName}>`,
+            );
         }
-
-        // check global
-
-        if (this._globalScope.containsKey(variableName, { checkEnclosing: false })) {
-            this._globalScope.set(variableName, variableValue);
-            return;
-        }
-
-        // no local & global. thorw
-
-        throw new Error(
-            `Runtime error. Undefined variable <${variableName}>`,
-        );
     }
 
     public visitVariableAST(node: VariableAST): number {
         const variableName = node.getName();
 
-        const currentAr = this.CALL_STACK.peek() as ActivationRecord;
+        const ar = this.CALL_STACK.peek().containsKey(variableName);
 
-        if (currentAr.containsKey(variableName, { checkEnclosing: false })) {
-            return currentAr.get(variableName);
+        if (ar) {
+            return ar.get(variableName);
+        } else {
+            throw new Error('Runtime error. Variable not found: ' + variableName);
         }
-
-        if (this._globalScope.containsKey(variableName, { checkEnclosing: false })) {
-            return this._globalScope.get(variableName);
-        }
-
-        throw new Error('Runtime error. Variable not found: ' + variableName);
     }
 
     public visitCompoundAST(node: CompoundAST): void {
@@ -295,8 +283,6 @@ export class Interpreter extends ASTVisitor {
         this.visit(node.getBlock());
 
         this._log(`Leave: Program ${programName}`);
-        
-        // this.CALL_STACK.print();
 
         this.CALL_STACK.pop();
     }
@@ -436,6 +422,23 @@ export class Interpreter extends ASTVisitor {
         while (this._iftruthy(this.visit(node.getCondition()))) {
             this.visit(node.getBody());
         }
+    }
+
+    public visitCallAST(node: CallAST): void {
+        const calle = this.visit(node.getCalle()) as Function;
+
+        const args = [];
+        for (const arg of node.getArguments()) {
+            args.push(this.visit(arg));
+        }
+
+        if (!calle.call) {
+            throw new Error('Runtime error. Can only call funcs');
+        }
+
+        // TODO: check arity ??? args.len !== calle.declaredArgs ?
+
+        return calle.call(this, args);
     }
 
     private _log(msg: string): void {

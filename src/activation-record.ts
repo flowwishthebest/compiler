@@ -72,10 +72,14 @@ export class ActivationRecord {
     public containsKey(
         key: string,
         opts: { checkEnclosing: boolean } = { checkEnclosing: true },
-    ): boolean {
-        const hasKey = this._members.has(key);
-        return hasKey || (this.getEnclosingAR() && opts.checkEnclosing &&
-                this.getEnclosingAR().containsKey(key));
+    ): ActivationRecord {
+        if (this._members.has(key)) {
+            return this;
+        } else if (opts.checkEnclosing && this.getEnclosingAR()) {
+            return this.getEnclosingAR().containsKey(key);
+        } else {
+            return null;
+        }
     }
 
     public toString(): string {

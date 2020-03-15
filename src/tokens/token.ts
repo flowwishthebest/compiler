@@ -6,8 +6,8 @@ export abstract class Token<T = any> {
     constructor(
         private readonly _type: ETokenType,
         private readonly _value?: T,
-        private readonly _lineNo?: number,
-        private readonly _columnNo?: number,
+        private _lineNo?: number,
+        private _columnNo?: number,
     ) {}
 
     public getType(): ETokenType {
@@ -16,6 +16,16 @@ export abstract class Token<T = any> {
 
     public getValue(): T {
         return this._value;
+    }
+
+    public setColumnNo(n: number): this {
+        this._columnNo = n;
+        return this;
+    }
+
+    public setLineNo(n: number): this {
+        this._lineNo = n;
+        return this;
     }
 
     public toString(): string {

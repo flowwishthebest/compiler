@@ -4,7 +4,7 @@
 
 program := declaration* EOF ;
 
-declaration := variableDeclaration | statement ;
+declaration := variableDeclaration | statement | functionDeclaration ;
 
 variableDeclaration := "var" IDENTIFIER (ASSIGN expression)? SEMICOLON ;
 
@@ -24,7 +24,11 @@ addition := multiplication (( "-" | "+" ) multiplication)* ;
 
 multiplication → unary (( "/" | "*" ) unary)* ;
 
-unary := ("!" | "-") unary | primary ;
+unary := ("!" | "-") unary | call ;
+
+call := primary ("(" arguments? ")")* ;
+
+argumenst := expression (COMMA expression)* ;
 
 primary := "true"
     |"false"
@@ -71,6 +75,12 @@ singleLineComment := SLASH SLASH (NUMBER | ALPHA)? NEWLINE ;
 SLASH := "/" ;
 NEWLINE := "\n" ;
 
+functionDeclaration := "func" function ;
+
+function := IDENTIFIER "(" parameters? ")" block ;
+
+parameters := IDENTIFIER (COMMA IDENTIFIER)* ;
+
 [X] операторы присвоения;
 [X] условный оператор;
 [X] оператор цикла;
@@ -78,4 +88,4 @@ NEWLINE := "\n" ;
 [X] поддержка целочисленных, вещественных переменных;
 [X] поддержка арифметических операций с числами;
 [X] возможность написания комментариев.
-поддержка одномерных числовых массивов;
+[X] поддержка одномерных числовых массивов;

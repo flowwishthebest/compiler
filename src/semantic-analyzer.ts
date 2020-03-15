@@ -35,12 +35,17 @@ const ID_NOT_FOUND_MESSAGE = (token: Token): string =>
 const WRONG_NUMS_ARGS_MESSAGE = (token: Token): string =>
     `${EErrorType.WRONG_NUMEBER_OF_ARGS} -> ${token.toString()}`;
 
+const defaultOpts = {
+    shouldLogScope: false,
+} as KwArgs;
+
 export class SemanticAnalyzer extends ASTVisitor {
+
     private _scope: ScopedSymbolTable;
     private _logScope: boolean;
     private _logger: any;
 
-    constructor(kwArgs: KwArgs = { shouldLogScope: false }) {
+    constructor(kwArgs: KwArgs = defaultOpts) {
         super();
 
         this._scope = null;
@@ -271,5 +276,15 @@ export class SemanticAnalyzer extends ASTVisitor {
         if (this._logScope) {
             this._logger.log(msg);
         }
+    }
+
+    private _declarare(name: Token): void {
+        if (!this._scope) {
+            return;
+        }
+
+        this._scope.define(
+            new VariableSymbol(name.getValue(), this._scope.lookup('any')),
+        );
     }
 }

@@ -43,4 +43,5 @@ export enum ETokenType {
     CARET = 'CARET',
     OPEN_BRACKET = 'OPEN_BRACKET',
     CLOSED_BRACKET = 'CLOSED_BRACKET',
+    FUNC = 'FUNC',
 }
