@@ -17,8 +17,13 @@
     "lint:fix": "tslint --fix -p ./tsconfig.json -c ./tslint.json",
     "prettify": "prettier --config ./prettierrc.json --write '{src,__tests__}/**/*.ts'",
     "start": "node dist/main.js",
-    "debug": "node --inspect-brk=0.0.0.0 dist/main.js"
+    "debug": "node --inspect-brk=0.0.0.0 dist/main.js",
+    "prepublish": "npm run build"
   },
+  "files": [
+    "bin/",
+    "dist/"
+  ],
   "keywords": [
     "computer science",
     "cs",
